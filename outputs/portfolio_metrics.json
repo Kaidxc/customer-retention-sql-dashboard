@@ -1,0 +1,16 @@
+{
+  "analysis_date": "2011-12-10",
+  "clean_rows": 793609,
+  "distinct_customers": 5878,
+  "distinct_orders": 36969,
+  "total_revenue": 17685460.64,
+  "repeat_purchase_rate": 0.7238856753997959,
+  "top_segment": "Champions",
+  "top_segment_revenue": 12156257.27,
+  "at_risk_high_value_customers": 397,
+  "at_risk_high_value_revenue": 1465865.53,
+  "campaign_target_count": 300,
+  "latest_month": "2011-12-01",
+  "latest_month_revenue": 517208.44,
+  "average_month_1_to_3_retention": 0.2156159420289855
+}

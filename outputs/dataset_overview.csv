@@ -1,0 +1,2 @@
+analysis_date,clean_rows,distinct_orders,distinct_customers,total_revenue,average_line_value,first_transaction_date,last_transaction_date
+2011-12-10,793609,36969,5878,17685460.64,22.28,2009-12-01,2011-12-09

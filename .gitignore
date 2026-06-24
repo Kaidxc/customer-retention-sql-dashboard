@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Keep public repository light and privacy-aware.
+data/raw/
+data/interim/
+*.sqlite
+*.db
+
+# Power BI local working files can be large.
+*.pbix
+*.pbit
+
