@@ -24,6 +24,13 @@ Identify which existing customers should be prioritised for a retention campaign
 
 Prioritise the `At Risk High Value` segment first. These customers have meaningful historical spend but have not purchased recently, making them better candidates for a targeted retention campaign than low-value inactive customers.
 
+## Evidence for decision-makers
+
+- [Segment revenue view](../documentation/figures/segment_revenue.svg) shows where historical value is concentrated and highlights the retention opportunity.
+- [Monthly KPI trend](../documentation/figures/monthly_kpis.svg) shows how revenue and monthly repeat purchasing change over time.
+- [Cohort retention heatmap](../documentation/figures/cohort_retention.svg) shows the drop-off in repeat purchasing after the first purchase month.
+- [Campaign decision funnel](../documentation/figures/campaign_funnel.svg) shows how the campaign scope narrows from the full customer base to a testable target list.
+
 ## Measurement recommendation
 
 Run an A/B test on the campaign target list. Randomly assign eligible customers into treatment and control groups, then compare repeat purchase rate, revenue per customer, and average order value over a fixed measurement window.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import json
+import math
 import sqlite3
 from pathlib import Path
 
@@ -19,6 +20,7 @@ DEFAULT_INPUT = (
 SQL_DIR = PROJECT_ROOT / "sql"
 OUTPUT_DIR = PROJECT_ROOT / "outputs"
 DASHBOARD_DIR = PROJECT_ROOT / "dashboard"
+FIGURES_DIR = PROJECT_ROOT / "documentation" / "figures"
 
 
 QUERY_OUTPUTS = {
@@ -29,6 +31,7 @@ QUERY_OUTPUTS = {
     "03_cohort_retention.sql": "cohort_retention.csv",
     "04_campaign_targets.sql": "campaign_targets.csv",
     "05_monthly_kpis.sql": "monthly_kpis.csv",
+    "06_repeat_customer_summary.sql": "repeat_customer_summary.csv",
 }
 
 
@@ -158,11 +161,211 @@ Identify which existing customers should be prioritised for a retention campaign
 
 Prioritise the `At Risk High Value` segment first. These customers have meaningful historical spend but have not purchased recently, making them better candidates for a targeted retention campaign than low-value inactive customers.
 
+## Evidence for decision-makers
+
+- [Segment revenue view](../documentation/figures/segment_revenue.svg) shows where historical value is concentrated and highlights the retention opportunity.
+- [Monthly KPI trend](../documentation/figures/monthly_kpis.svg) shows how revenue and monthly repeat purchasing change over time.
+- [Cohort retention heatmap](../documentation/figures/cohort_retention.svg) shows the drop-off in repeat purchasing after the first purchase month.
+- [Campaign decision funnel](../documentation/figures/campaign_funnel.svg) shows how the campaign scope narrows from the full customer base to a testable target list.
+
 ## Measurement recommendation
 
 Run an A/B test on the campaign target list. Randomly assign eligible customers into treatment and control groups, then compare repeat purchase rate, revenue per customer, and average order value over a fixed measurement window.
 """
     (OUTPUT_DIR / "executive_summary.md").write_text(md, encoding="utf-8")
+
+
+def write_svg(path: Path, title: str, description: str, width: int, height: int, body: str) -> None:
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="chart-title chart-description">
+  <title id="chart-title">{html.escape(title)}</title>
+  <desc id="chart-description">{html.escape(description)}</desc>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif">{body}</g>
+</svg>
+'''
+    path.write_text(svg, encoding="utf-8")
+
+
+def chart_text(value: object, x: float, y: float, size: int = 14, anchor: str = "start", weight: str = "400", fill: str = "#17202a") -> str:
+    return (
+        f'<text x="{x:.1f}" y="{y:.1f}" font-size="{size}px" text-anchor="{anchor}" '
+        f'font-weight="{weight}" fill="{fill}">{html.escape(str(value))}</text>'
+    )
+
+
+def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object]) -> None:
+    """Create static, dependency-light SVG charts from the same SQL outputs as the dashboard."""
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Segment revenue chart.
+    rfm = outputs["rfm_segment_summary.csv"].sort_values("segment_revenue").reset_index(drop=True)
+    width, height = 1100, 620
+    left, right, top, bottom = 285, 210, 105, 70
+    plot_width = width - left - right
+    max_value = max(float(rfm["segment_revenue"].max()), 1.0)
+    row_height, gap = 42, 18
+    body = [chart_text("Historical value is concentrated in Champions; At Risk High Value is the retention opportunity", 40, 48, 17, weight="500")]
+    for tick in range(0, 5):
+        tick_value = max_value * tick / 4
+        x = left + plot_width * tick / 4
+        body.append(f'<line x1="{x:.1f}" y1="{top - 15}" x2="{x:.1f}" y2="{height - bottom}" stroke="#d9dee7" stroke-width="1"/>')
+        body.append(chart_text(f"GBP {tick_value / 1_000_000:.1f}m", x, height - 30, 11, anchor="middle", fill="#5b6675"))
+    for index, row in rfm.iterrows():
+        y = top + index * (row_height + gap)
+        value = float(row["segment_revenue"])
+        bar_width = plot_width * value / max_value
+        color = "#c2410c" if row["rfm_segment"] == "At Risk High Value" else "#94a3b8"
+        body.append(chart_text(row["rfm_segment"], left - 15, y + 27, 13, anchor="end"))
+        body.append(f'<rect x="{left}" y="{y}" width="{bar_width:.1f}" height="{row_height}" rx="4" fill="{color}"/>')
+        body.append(chart_text(f"GBP {value / 1_000_000:.2f}m", min(left + bar_width + 12, width - 8), y + 27, 12, fill="#334155"))
+    write_svg(
+        FIGURES_DIR / "segment_revenue.svg",
+        "Historical revenue by RFM segment",
+        "Horizontal bars compare historical revenue across RFM customer segments and highlight the At Risk High Value segment.",
+        width,
+        height,
+        "".join(body),
+    )
+
+    def line_panel(values: list[float], labels: list[str], x0: int, y0: int, panel_width: int, panel_height: int, title: str, color: str, value_formatter) -> list[str]:
+        panel = [chart_text(title, x0, y0, 16, weight="500")]
+        plot_top = y0 + 28
+        plot_bottom = y0 + panel_height - 30
+        maximum = max(max(values), 1.0) * 1.12
+        for fraction in (0, 0.5, 1):
+            y = plot_bottom - (plot_bottom - plot_top) * fraction
+            panel.append(f'<line x1="{x0}" y1="{y:.1f}" x2="{x0 + panel_width}" y2="{y:.1f}" stroke="#d9dee7" stroke-width="1"/>')
+            panel.append(chart_text(value_formatter(maximum * fraction), x0 - 10, y + 4, 11, anchor="end", fill="#5b6675"))
+        points = []
+        for index, value in enumerate(values):
+            x = x0 + panel_width * index / max(len(values) - 1, 1)
+            y = plot_bottom - (plot_bottom - plot_top) * value / maximum
+            points.append((x, y))
+        point_string = " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
+        panel.append(f'<polyline points="{point_string}" fill="none" stroke="{color}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>')
+        for x, y in points:
+            panel.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="#ffffff" stroke="{color}" stroke-width="2"/>')
+        for index, label in enumerate(labels):
+            if index % max(1, math.ceil(len(labels) / 7)) == 0 or index == len(labels) - 1:
+                x = x0 + panel_width * index / max(len(labels) - 1, 1)
+                panel.append(chart_text(label, x, plot_bottom + 22, 10, anchor="middle", fill="#5b6675"))
+        return panel
+
+    monthly = outputs["monthly_kpis.csv"].copy()
+    monthly_labels = pd.to_datetime(monthly["transaction_month"]).dt.strftime("%Y-%m").tolist()
+    monthly_body = [chart_text("Monthly revenue is volatile, so targeting should use customer-level value", 80, 42, 19, weight="500")]
+    monthly_body += line_panel(
+        monthly["revenue"].astype(float).tolist(),
+        monthly_labels,
+        105,
+        82,
+        900,
+        250,
+        "Monthly revenue",
+        "#2563eb",
+        lambda value: f"GBP {value / 1_000_000:.1f}m",
+    )
+    monthly_body += line_panel(
+        (monthly["repeat_purchase_rate"].astype(float) * 100).tolist(),
+        monthly_labels,
+        105,
+        375,
+        900,
+        250,
+        "Monthly repeat-purchase rate",
+        "#0f766e",
+        lambda value: f"{value:.0f}%",
+    )
+    write_svg(
+        FIGURES_DIR / "monthly_kpis.svg",
+        "Monthly revenue and repeat-purchase KPIs",
+        "Two line charts show monthly revenue and the monthly share of customers placing at least two orders.",
+        1100,
+        670,
+        "".join(monthly_body),
+    )
+
+    # Cohort retention heatmap.
+    cohort = outputs["cohort_retention.csv"].copy()
+    cohort_pivot = cohort.pivot_table(
+        index="cohort_month",
+        columns="months_since_first_purchase",
+        values="retention_rate",
+        aggfunc="first",
+    )
+    visible_columns = [column for column in cohort_pivot.columns if int(column) <= 12]
+    cohort_pivot = cohort_pivot.loc[:, visible_columns].tail(12)
+    width, height = 1100, 610
+    left, top, cell_width, cell_height = 145, 105, 68, 31
+    body = [chart_text("Retention drops sharply after the first purchase month", left, 45, 19, weight="500")]
+    body.append(chart_text("Months since first purchase", left + 6 * cell_width, 585, 13, anchor="middle", fill="#5b6675"))
+    for column_index, column in enumerate(cohort_pivot.columns):
+        x = left + column_index * cell_width
+        body.append(chart_text(f"M+{int(column)}", x + cell_width / 2, 88, 11, anchor="middle", fill="#5b6675"))
+    for row_index, (cohort_name, row) in enumerate(cohort_pivot.iterrows()):
+        y = top + row_index * cell_height
+        body.append(chart_text(cohort_name, left - 12, y + 21, 11, anchor="end", fill="#5b6675"))
+        for column_index, value in enumerate(row):
+            x = left + column_index * cell_width
+            if pd.isna(value):
+                fill = "#f1f5f9"
+                label = ""
+            else:
+                strength = min(max(float(value), 0.0), 1.0)
+                red = int(224 - 195 * strength)
+                green = int(242 - 177 * strength)
+                blue = int(254 - 34 * strength)
+                fill = f"rgb({red},{green},{blue})"
+                label = f"{float(value):.0%}"
+            body.append(f'<rect x="{x}" y="{y}" width="{cell_width - 2}" height="{cell_height - 2}" rx="2" fill="{fill}"/>')
+            if label:
+                text_color = "#ffffff" if float(value) >= 0.55 else "#17202a"
+                body.append(chart_text(label, x + (cell_width - 2) / 2, y + 20, 10, anchor="middle", fill=text_color))
+    write_svg(
+        FIGURES_DIR / "cohort_retention.svg",
+        "Cohort retention heatmap",
+        "Heatmap showing the percentage of each acquisition cohort that purchased again in later months.",
+        width,
+        height,
+        "".join(body),
+    )
+
+    # Campaign decision funnel.
+    values = [
+        int(summary["distinct_customers"]),
+        int(summary["at_risk_high_value_customers"]),
+        int(summary["campaign_target_count"]),
+    ]
+    labels = ["All known\ncustomers", "At-risk high-value\ncustomers", "Prioritised target\nlist"]
+    width, height = 950, 570
+    left, right, top, bottom = 90, 70, 100, 90
+    plot_width, plot_height = width - left - right, height - top - bottom
+    max_value = max(values)
+    body = [chart_text("The campaign decision narrows the customer base to 300 testable targets", left, 48, 19, weight="500")]
+    for tick in range(0, 5):
+        value = max_value * tick / 4
+        y = top + plot_height - plot_height * tick / 4
+        body.append(f'<line x1="{left}" y1="{y:.1f}" x2="{width - right}" y2="{y:.1f}" stroke="#d9dee7" stroke-width="1"/>')
+        body.append(chart_text(f"{value / 1_000:.0f}k" if value >= 1000 else f"{value:.0f}", left - 10, y + 4, 11, anchor="end", fill="#5b6675"))
+    bar_width = 150
+    colors = ["#94a3b8", "#c2410c", "#2563eb"]
+    for index, (value, label) in enumerate(zip(values, labels)):
+        x = left + (index + 0.5) * plot_width / 3 - bar_width / 2
+        bar_height = plot_height * value / max_value
+        y = top + plot_height - bar_height
+        body.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{bar_width}" height="{bar_height:.1f}" rx="4" fill="{colors[index]}"/>')
+        body.append(chart_text(f"{value:,}", x + bar_width / 2, y - 10, 14, anchor="middle", weight="500"))
+        label_lines = label.split("\n")
+        for line_index, line in enumerate(label_lines):
+            body.append(chart_text(line, x + bar_width / 2, height - bottom + 25 + line_index * 17, 12, anchor="middle", fill="#334155"))
+    write_svg(
+        FIGURES_DIR / "campaign_funnel.svg",
+        "Campaign decision funnel",
+        "Bars show the reduction from all known customers to the high-value inactive segment and the prioritised campaign list.",
+        width,
+        height,
+        "".join(body),
+    )
 
 
 def table_html(df: pd.DataFrame, max_rows: int = 10) -> str:
@@ -377,8 +580,21 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
       font-size: 13px;
       margin-top: 10px;
     }}
+    .figure-grid {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }}
+    figure {{
+      margin: 0;
+    }}
+    figure img {{
+      display: block;
+      width: 100%;
+      height: auto;
+    }}
     @media (max-width: 900px) {{
-      .kpi-grid, .grid-2 {{
+      .kpi-grid, .grid-2, .figure-grid {{
         grid-template-columns: 1fr;
       }}
       .bar-row {{
@@ -401,6 +617,17 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
       <div class="kpi"><div class="kpi-title">Customers</div><div class="kpi-value">{int(summary["distinct_customers"]):,}</div></div>
       <div class="kpi"><div class="kpi-title">Orders</div><div class="kpi-value">{int(summary["distinct_orders"]):,}</div></div>
       <div class="kpi"><div class="kpi-title">Repeat Purchase Rate</div><div class="kpi-value">{as_pct(float(summary["repeat_purchase_rate"]))}</div></div>
+    </div>
+
+    <div class="figure-grid">
+      <section>
+        <h2>Decision evidence: segment revenue</h2>
+        <figure><img src="../documentation/figures/segment_revenue.svg" alt="Historical revenue by RFM segment"></figure>
+      </section>
+      <section>
+        <h2>Decision evidence: campaign scope</h2>
+        <figure><img src="../documentation/figures/campaign_funnel.svg" alt="Campaign decision funnel"></figure>
+      </section>
     </div>
 
     <section>
@@ -446,12 +673,20 @@ def main() -> None:
     with create_database(df) as conn:
         outputs = run_sql_outputs(conn)
     summary = generate_summary(outputs)
+    generate_figures(outputs, summary)
     generate_dashboard(outputs, summary)
 
     print("Generated project outputs:")
     for csv_name in QUERY_OUTPUTS.values():
         print(f"- {OUTPUT_DIR / csv_name}")
     print(f"- {OUTPUT_DIR / 'executive_summary.md'}")
+    for figure_name in (
+        "segment_revenue.svg",
+        "monthly_kpis.svg",
+        "cohort_retention.svg",
+        "campaign_funnel.svg",
+    ):
+        print(f"- {FIGURES_DIR / figure_name}")
     print(f"- {DASHBOARD_DIR / 'customer_retention_dashboard.html'}")
 
 

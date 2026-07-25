@@ -1,3 +1,4 @@
+-- Business question: how should customers be segmented for CRM action?
 WITH params AS (
     SELECT
         date(max(invoice_date), '+1 day') AS analysis_date
@@ -60,4 +61,3 @@ SELECT
     END AS rfm_segment
 FROM scored
 ORDER BY total_revenue DESC;
-

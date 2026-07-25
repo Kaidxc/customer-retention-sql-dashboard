@@ -1,3 +1,4 @@
+-- Business question: what does customer value and repeat behaviour look like?
 WITH params AS (
     SELECT
         date(max(invoice_date), '+1 day') AS analysis_date
@@ -28,4 +29,3 @@ SELECT
 FROM customer_orders
 GROUP BY customer_id
 ORDER BY total_revenue DESC;
-

@@ -1,3 +1,4 @@
+-- Business question: what is the size, date range and value of the clean dataset?
 WITH params AS (
     SELECT
         date(max(invoice_date), '+1 day') AS analysis_date
@@ -13,4 +14,3 @@ SELECT
     MIN(date(invoice_date)) AS first_transaction_date,
     MAX(date(invoice_date)) AS last_transaction_date
 FROM clean_transactions;
-

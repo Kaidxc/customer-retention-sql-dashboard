@@ -1,3 +1,4 @@
+-- Business question: which customer segments contribute the most value?
 WITH params AS (
     SELECT
         date(max(invoice_date), '+1 day') AS analysis_date

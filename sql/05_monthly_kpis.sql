@@ -1,3 +1,4 @@
+-- Business question: how do revenue and repeat purchasing change month by month?
 WITH order_values AS (
     SELECT
         invoice_no,
@@ -32,4 +33,3 @@ INNER JOIN customer_month_counts c
    AND o.customer_id = c.customer_id
 GROUP BY o.transaction_month
 ORDER BY o.transaction_month;
-

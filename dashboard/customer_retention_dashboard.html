@@ -119,8 +119,21 @@
       font-size: 13px;
       margin-top: 10px;
     }
+    .figure-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+    figure {
+      margin: 0;
+    }
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
     @media (max-width: 900px) {
-      .kpi-grid, .grid-2 {
+      .kpi-grid, .grid-2, .figure-grid {
         grid-template-columns: 1fr;
       }
       .bar-row {
@@ -143,6 +156,17 @@
       <div class="kpi"><div class="kpi-title">Customers</div><div class="kpi-value">5,878</div></div>
       <div class="kpi"><div class="kpi-title">Orders</div><div class="kpi-value">36,969</div></div>
       <div class="kpi"><div class="kpi-title">Repeat Purchase Rate</div><div class="kpi-value">72.4%</div></div>
+    </div>
+
+    <div class="figure-grid">
+      <section>
+        <h2>Decision evidence: segment revenue</h2>
+        <figure><img src="../documentation/figures/segment_revenue.svg" alt="Historical revenue by RFM segment"></figure>
+      </section>
+      <section>
+        <h2>Decision evidence: campaign scope</h2>
+        <figure><img src="../documentation/figures/campaign_funnel.svg" alt="Campaign decision funnel"></figure>
+      </section>
     </div>
 
     <section>

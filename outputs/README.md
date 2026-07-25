@@ -16,6 +16,7 @@ python scripts/build_customer_retention_outputs.py
 | `rfm_segment_summary.csv` | Segment-level customers, revenue and average recency |
 | `cohort_retention.csv` | Monthly cohort retention table for heatmaps |
 | `monthly_kpis.csv` | Monthly revenue, orders, customers, AOV and repeat purchase rate |
+| `repeat_customer_summary.csv` | Customers with at least two completed orders, using `WHERE` and `HAVING` for a retention-focused extract |
 | `campaign_targets.csv` | Prioritised customer list for a retention campaign |
 | `executive_summary.md` | Business interpretation of the generated outputs |
 | `portfolio_metrics.json` | Compact metrics used by the generated dashboard |
@@ -23,4 +24,3 @@ python scripts/build_customer_retention_outputs.py
 ## Dashboard use
 
 The CSVs can be loaded into Power BI, Tableau, Excel, or a notebook. The recommended dashboard pages are documented in `../dashboard/README.md`.
-

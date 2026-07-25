@@ -1,3 +1,4 @@
+-- Business question: which customers should be prioritised under a limited budget?
 WITH params AS (
     SELECT
         date(max(invoice_date), '+1 day') AS analysis_date
@@ -80,4 +81,3 @@ SELECT
 FROM eligible_targets
 ORDER BY priority_rank
 LIMIT 300;
-

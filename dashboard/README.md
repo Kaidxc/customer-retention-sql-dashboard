@@ -13,6 +13,8 @@ It contains:
 - Cohort retention heatmap.
 - Business recommendation.
 
+The repository homepage also includes static PNG versions of the key visuals so that the business story is visible directly on GitHub without opening the HTML file.
+
 ## Power BI version
 
 For a Power BI version, import these files from `../outputs`:
@@ -34,7 +36,6 @@ Recommended pages:
 
 - KPI cards for revenue, customers, orders and repeat purchase rate.
 - Bar chart for RFM segment revenue.
-- Line chart for monthly revenue and customers.
+- Line charts for monthly revenue and repeat-purchase rate.
 - Matrix heatmap for cohort retention.
 - Table for campaign targets.
-

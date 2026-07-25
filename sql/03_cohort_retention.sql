@@ -1,3 +1,4 @@
+-- Business question: how does repeat purchasing change across acquisition cohorts?
 WITH customer_monthly_orders AS (
     SELECT DISTINCT
         customer_id,
@@ -42,4 +43,3 @@ FROM cohort_activity a
 INNER JOIN cohort_sizes s
     ON a.cohort_month = s.cohort_month
 ORDER BY a.cohort_month, a.months_since_first_purchase;
-
