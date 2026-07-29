@@ -2,40 +2,46 @@
 
 ## Decision to evaluate
 
-The analysis recommends prioritising high-value inactive customers for a retention campaign. That recommendation is a hypothesis: these customers look like a strong priority, but historical transaction data alone cannot prove that contacting them will cause additional purchases.
+The report recommends product actions: protect high-revenue products, use high-unit products for basket-building, review slow-moving products, and use a next-quarter baseline for selected stable products.
 
-## Evaluation question
+Those recommendations are hypotheses. Historical sales can show where to act, but a business still needs to measure whether the action improved performance.
 
-Does a targeted retention campaign improve repeat purchase behaviour among high-value inactive customers compared with a similar group that is not contacted during the same measurement window?
+## Evaluation questions
+
+| Product action | Evaluation question |
+|---|---|
+| Stock protection | Did availability protection reduce missed sales or stockout risk for high-revenue products? |
+| Bundling/add-ons | Did high-unit products increase basket value when used as add-ons or bundles? |
+| Slow-moving review | Did clearance, relisting, repositioning or delisting improve stock efficiency? |
+| Forecast baseline | Did the baseline improve next-quarter planning accuracy compared with a naive prior-period view? |
 
 ## Suggested design
 
 | Element | Recommendation |
 |---|---|
-| Eligible population | Customers in the `At Risk High Value` segment with at least two previous orders. |
-| Assignment | Randomly split eligible customers into treatment and control groups. |
-| Treatment group | Receive the retention campaign. |
-| Control group | Do not receive the campaign during the test window. |
-| Measurement window | A fixed post-campaign window, for example 30, 60 or 90 days. |
-| Primary metric | Repeat purchase rate during the measurement window. |
-| Secondary metrics | Revenue per customer, average order value and number of orders per customer. |
-| Guardrail metrics | Opt-outs, contact failures, complaint rate and campaign cost if available. |
+| Eligible products | Products identified by the report as high-revenue, high-unit, slow-moving or forecastable. |
+| Comparison | Compare against similar products not receiving the action, or against the same products in a prior comparable period. |
+| Measurement window | Use a fixed post-action window, such as 4, 8 or 12 weeks, depending on product seasonality. |
+| Primary metrics | Revenue, units sold, order count and sell-through rate if inventory is available. |
+| Secondary metrics | Average selling price, basket value, customer reach and repeat purchase context. |
+| Guardrails | Margin, discount cost, stock availability, return rate and supplier constraints if available. |
 
 ## Success criteria
 
-The campaign should be considered successful only if the treatment group performs better than the control group on repeat purchase rate and the difference is commercially meaningful after considering campaign cost.
+A product action should be considered successful only if it improves the intended metric and remains commercially sensible after considering margin, stock availability and promotion cost.
+
+For forecasting, success should be judged by forecast error, such as MAE or MAPE, compared with a simple benchmark.
 
 ## What this prevents
 
-This evaluation design avoids treating correlation as proof. Customers with high historical value may have returned anyway. A control group helps estimate the incremental effect of the campaign rather than only reporting post-campaign revenue.
+This plan avoids treating historical correlation as proof. A product that sold well before may continue selling without intervention; a product that slowed down may have been out of stock rather than undesirable. Evaluation separates the effect of the action from the product's existing pattern.
 
 ## Limitations
 
-- Margin and campaign cost are not available in the current dataset, so the first analysis uses revenue rather than profit.
-- Channel permissions and contact history are not available, so the project cannot check who can legally or practically be contacted.
-- The sample size of the eligible group should be checked before committing to a final test design.
-- Seasonality may affect results, so treatment and control groups should be measured over the same calendar period.
+- Inventory, stockout, margin and promotion cost are not available in the current dataset.
+- Product category is not available, so similar-product comparison would need extra business data.
+- Some products may be seasonal or discontinued, which should be checked before measuring impact.
 
 ## Transferable value
 
-This plan is relevant to any role where an analyst needs to evaluate whether an action worked. The same logic can be applied to service interventions, operational changes, communications campaigns, prevention activity, process improvements or customer programmes.
+The same logic applies to analyst roles where recommendations need to be tested: product launches, merchandising changes, service interventions, operational process changes, communications activity or pricing decisions.

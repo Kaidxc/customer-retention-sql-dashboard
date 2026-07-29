@@ -2,18 +2,18 @@
 
 ## Why this matters
 
-The recommendation is only useful if the underlying data is reliable enough for customer-level prioritisation. This project therefore includes a lightweight quality-assurance layer before the insight is used for action.
+The recommendation is only useful if the transaction lines are reliable enough for product ranking, slow-moving review and forecasting. This project therefore includes a lightweight quality-assurance layer before the insight is used for action.
 
 The checks are framed around six common data quality dimensions:
 
 | Dimension | What it checks in this project | Why it matters |
 |---|---|---|
-| Accuracy | Whether `line_value` matches `quantity * unit_price` | Revenue and customer value calculations depend on this. |
-| Validity | Whether transaction values are positive and usable | Cancelled or invalid rows would distort customer KPIs. |
-| Timeliness | Whether transaction dates sit within the analysis window | Recency and trend analysis rely on sensible dates. |
-| Completeness | Whether key fields such as customer, invoice, date and value are populated | Missing IDs prevent customer-level targeting. |
-| Consistency | Whether invoices map to a single customer | Inconsistent invoice ownership can affect order counts. |
-| Uniqueness | Whether duplicate transaction lines remain | Duplicates can inflate revenue, frequency and segment value. |
+| Accuracy | Whether `line_value` matches `quantity * unit_price` | Product revenue and forecast inputs depend on this. |
+| Validity | Whether transaction values are positive and usable | Cancelled or invalid rows would distort product performance. |
+| Timeliness | Whether transaction dates sit within the analysis window | Trend, recency and quarterly forecast logic rely on sensible dates. |
+| Completeness | Whether key fields such as product, invoice, date, customer and value are populated | Missing identifiers weaken product ranking and customer-reach context. |
+| Consistency | Whether invoices map to one customer | Inconsistent invoice ownership can affect order and reach metrics. |
+| Uniqueness | Whether duplicate transaction lines remain | Duplicates can inflate product units, revenue and order counts. |
 
 ## Generated output
 
@@ -33,7 +33,7 @@ Each row records the dimension, check name, affected row count, affected share a
 
 ## Transferable value
 
-The same approach can be used beyond retail customer analytics. For a performance, public service, BI or evaluation role, these checks translate into a habit of asking:
+The same approach can be used beyond retail product analytics. For a performance, BI, commercial or evaluation role, these checks translate into a habit of asking:
 
 - Is the data complete enough to support the decision?
 - Are the values valid and internally consistent?

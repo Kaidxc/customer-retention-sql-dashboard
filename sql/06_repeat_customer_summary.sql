@@ -1,6 +1,6 @@
--- Business question: which customers have demonstrated repeat purchasing?
+-- Business question: which customer IDs show repeat purchase behaviour?
 -- WHERE removes incomplete customer records before aggregation; HAVING keeps
--- customers with at least two completed orders for retention analysis.
+-- customer IDs with at least two completed orders as purchase context.
 WITH customer_orders AS (
     SELECT
         customer_id,

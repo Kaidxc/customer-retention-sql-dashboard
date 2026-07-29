@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Customer Retention Dashboard</title>
+  <title>Online Retail Product Sales Dashboard</title>
   <style>
     :root {
       --ink: #17202a;
@@ -110,10 +110,6 @@
       font-weight: 700;
       background: #fbfcff;
     }
-    .heatmap td, .heatmap th {
-      text-align: center;
-      padding: 7px;
-    }
     .note {
       color: var(--muted);
       font-size: 13px;
@@ -147,301 +143,468 @@
 </head>
 <body>
   <header>
-    <h1>Customer Retention Dashboard</h1>
-    <p>SQL-driven retention, RFM segmentation, cohort analysis and campaign targeting for an online retail dataset.</p>
+    <h1>Online Retail Product Sales Dashboard</h1>
+    <p>Product performance, top sellers, slow-moving candidates and next-quarter planning baseline.</p>
   </header>
   <main>
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-title">Total Revenue</div><div class="kpi-value">GBP 17,685,461</div></div>
-      <div class="kpi"><div class="kpi-title">Customers</div><div class="kpi-value">5,878</div></div>
+      <div class="kpi"><div class="kpi-title">Merchandise Products</div><div class="kpi-value">4,626</div></div>
       <div class="kpi"><div class="kpi-title">Orders</div><div class="kpi-value">36,969</div></div>
-      <div class="kpi"><div class="kpi-title">Repeat Purchase Rate</div><div class="kpi-value">72.4%</div></div>
+      <div class="kpi"><div class="kpi-title">Top 500 Revenue Share</div><div class="kpi-value">64.0%</div></div>
     </div>
 
     <div class="figure-grid">
       <section>
-        <h2>Decision evidence: segment revenue</h2>
-        <figure><img src="../documentation/figures/segment_revenue.svg" alt="Historical revenue by RFM segment"></figure>
+        <h2>Catalogue Structure</h2>
+        <figure><img src="../documentation/figures/product_catalog_overview.svg" alt="Product catalogue overview"></figure>
       </section>
       <section>
-        <h2>Decision evidence: campaign scope</h2>
-        <figure><img src="../documentation/figures/campaign_funnel.svg" alt="Campaign decision funnel"></figure>
+        <h2>Next-Quarter Baseline</h2>
+        <figure><img src="../documentation/figures/product_forecast_next_quarter.svg" alt="Next-quarter product forecast"></figure>
       </section>
     </div>
 
     <section>
-      <h2>RFM Segment Revenue</h2>
-      
-            <div class="bar-row">
-              <div class="bar-label">Champions</div>
-              <div class="bar-track"><div class="bar-fill" style="width:100.0%"></div></div>
-              <div class="bar-value">1,341 customers | GBP 12,156,257</div>
-            </div>
-            
-            <div class="bar-row">
-              <div class="bar-label">Loyal Customers</div>
-              <div class="bar-track"><div class="bar-fill" style="width:16.0%"></div></div>
-              <div class="bar-value">662 customers | GBP 1,947,770</div>
-            </div>
-            
-            <div class="bar-row">
-              <div class="bar-label">Needs Nurture</div>
-              <div class="bar-track"><div class="bar-fill" style="width:13.8%"></div></div>
-              <div class="bar-value">1,883 customers | GBP 1,679,924</div>
-            </div>
-            
-            <div class="bar-row">
-              <div class="bar-label">At Risk High Value</div>
-              <div class="bar-track"><div class="bar-fill" style="width:12.1%"></div></div>
-              <div class="bar-value">397 customers | GBP 1,465,866</div>
-            </div>
-            
-            <div class="bar-row">
-              <div class="bar-label">Low Value Inactive</div>
-              <div class="bar-track"><div class="bar-fill" style="width:2.9%"></div></div>
-              <div class="bar-value">1,358 customers | GBP 355,139</div>
-            </div>
-            
-            <div class="bar-row">
-              <div class="bar-label">New Customers</div>
-              <div class="bar-track"><div class="bar-fill" style="width:0.7%"></div></div>
-              <div class="bar-value">237 customers | GBP 80,505</div>
-            </div>
-            
-      <div class="note">Revenue bars use historical clean transaction revenue by customer segment.</div>
+      <h2>Revenue Concentration</h2>
+      <table>
+<thead><tr>
+<th>product_group</th>
+<th>top_n</th>
+<th>products_in_group</th>
+<th>group_revenue</th>
+<th>revenue_share</th>
+</tr></thead><tbody>
+<tr>
+<td>Top 10</td>
+<td>10.0</td>
+<td>10</td>
+<td>GBP 1,408,930</td>
+<td>8.1%</td>
+</tr>
+<tr>
+<td>Top 50</td>
+<td>50.0</td>
+<td>50</td>
+<td>GBP 3,434,493</td>
+<td>19.8%</td>
+</tr>
+<tr>
+<td>Top 100</td>
+<td>100.0</td>
+<td>100</td>
+<td>GBP 5,181,743</td>
+<td>29.8%</td>
+</tr>
+<tr>
+<td>Top 500</td>
+<td>500.0</td>
+<td>500</td>
+<td>GBP 11,123,897</td>
+<td>64.0%</td>
+</tr>
+<tr>
+<td>All merchandise products</td>
+<td>nan</td>
+<td>4626</td>
+<td>GBP 17,381,778</td>
+<td>100.0%</td>
+</tr>
+</tbody></table>
+      <div class="note">Service and administrative stock lines are excluded from merchandise revenue concentration.</div>
     </section>
 
     <div class="grid-2">
       <section>
-        <h2>Recent Monthly KPIs</h2>
+        <h2>Top Products by Revenue</h2>
+        <figure><img src="../documentation/figures/top_products_by_revenue.svg" alt="Top products by revenue"></figure>
         <table>
 <thead><tr>
-<th>transaction_month</th>
-<th>revenue</th>
-<th>orders</th>
-<th>customers</th>
-<th>average_order_value</th>
-<th>repeat_purchase_rate</th>
+<th>stock_code</th>
+<th>product_description</th>
+<th>total_revenue</th>
+<th>total_quantity</th>
+<th>order_count</th>
+<th>customer_count</th>
 </tr></thead><tbody>
 <tr>
-<td>2011-01-01</td>
-<td>GBP 568,101</td>
-<td>987</td>
-<td>741</td>
-<td>GBP 576</td>
-<td>20.1%</td>
+<td>22423</td>
+<td>REGENCY CAKESTAND 3 TIER</td>
+<td>GBP 285,992</td>
+<td>24858</td>
+<td>3317</td>
+<td>1314</td>
 </tr>
 <tr>
-<td>2011-02-01</td>
-<td>GBP 446,085</td>
-<td>997</td>
-<td>758</td>
-<td>GBP 447</td>
-<td>19.7%</td>
+<td>85123A</td>
+<td>WHITE HANGING HEART T-LIGHT HOLDER</td>
+<td>GBP 251,887</td>
+<td>93577</td>
+<td>4895</td>
+<td>1490</td>
 </tr>
 <tr>
-<td>2011-03-01</td>
-<td>GBP 594,082</td>
-<td>1321</td>
-<td>974</td>
-<td>GBP 450</td>
-<td>20.6%</td>
+<td>85099B</td>
+<td>RED RETROSPOT JUMBO BAG</td>
+<td>GBP 170,298</td>
+<td>94809</td>
+<td>3260</td>
+<td>978</td>
 </tr>
 <tr>
-<td>2011-04-01</td>
-<td>GBP 468,374</td>
-<td>1149</td>
-<td>856</td>
-<td>GBP 408</td>
-<td>19.6%</td>
+<td>23843</td>
+<td>PAPER CRAFT , LITTLE BIRDIE</td>
+<td>GBP 168,470</td>
+<td>80995</td>
+<td>1</td>
+<td>1</td>
 </tr>
 <tr>
-<td>2011-05-01</td>
-<td>GBP 677,355</td>
-<td>1555</td>
-<td>1056</td>
-<td>GBP 436</td>
-<td>26.4%</td>
+<td>84879</td>
+<td>ASSORTED COLOUR BIRD ORNAMENT</td>
+<td>GBP 126,704</td>
+<td>79694</td>
+<td>2652</td>
+<td>1010</td>
 </tr>
 <tr>
-<td>2011-06-01</td>
-<td>GBP 660,046</td>
-<td>1393</td>
-<td>991</td>
-<td>GBP 474</td>
-<td>22.1%</td>
+<td>47566</td>
+<td>PARTY BUNTING</td>
+<td>GBP 103,803</td>
+<td>23591</td>
+<td>2077</td>
+<td>894</td>
 </tr>
 <tr>
-<td>2011-07-01</td>
-<td>GBP 598,963</td>
-<td>1331</td>
-<td>949</td>
-<td>GBP 450</td>
-<td>23.9%</td>
+<td>23166</td>
+<td>MEDIUM CERAMIC TOP STORAGE JAR</td>
+<td>GBP 81,417</td>
+<td>77916</td>
+<td>195</td>
+<td>138</td>
 </tr>
 <tr>
-<td>2011-08-01</td>
-<td>GBP 644,051</td>
-<td>1280</td>
-<td>935</td>
-<td>GBP 503</td>
-<td>21.0%</td>
+<td>22086</td>
+<td>PAPER CHAIN KIT 50&#x27;S CHRISTMAS</td>
+<td>GBP 79,456</td>
+<td>29430</td>
+<td>1691</td>
+<td>896</td>
 </tr>
 <tr>
-<td>2011-09-01</td>
-<td>GBP 950,690</td>
-<td>1755</td>
-<td>1266</td>
-<td>GBP 542</td>
-<td>21.4%</td>
+<td>79321</td>
+<td>CHILLI LIGHTS</td>
+<td>GBP 72,528</td>
+<td>15658</td>
+<td>922</td>
+<td>304</td>
 </tr>
 <tr>
-<td>2011-10-01</td>
-<td>GBP 1,035,642</td>
-<td>1929</td>
-<td>1364</td>
-<td>GBP 537</td>
-<td>23.7%</td>
-</tr>
-<tr>
-<td>2011-11-01</td>
-<td>GBP 1,156,206</td>
-<td>2657</td>
-<td>1664</td>
-<td>GBP 435</td>
-<td>32.5%</td>
-</tr>
-<tr>
-<td>2011-12-01</td>
-<td>GBP 517,208</td>
-<td>778</td>
-<td>615</td>
-<td>GBP 665</td>
-<td>17.2%</td>
+<td>22386</td>
+<td>JUMBO BAG PINK WITH WHITE SPOTS</td>
+<td>GBP 68,377</td>
+<td>37680</td>
+<td>1767</td>
+<td>601</td>
 </tr>
 </tbody></table>
       </section>
       <section>
-        <h2>Top Campaign Targets</h2>
+        <h2>Top Products by Units Sold</h2>
+        <figure><img src="../documentation/figures/top_products_by_quantity.svg" alt="Top products by units sold"></figure>
         <table>
 <thead><tr>
-<th>priority_rank</th>
-<th>customer_id</th>
+<th>stock_code</th>
+<th>product_description</th>
+<th>total_quantity</th>
 <th>total_revenue</th>
-<th>total_orders</th>
-<th>days_since_last_purchase</th>
-<th>rfm_segment</th>
+<th>order_count</th>
+<th>customer_count</th>
 </tr></thead><tbody>
 <tr>
+<td>84077</td>
+<td>WORLD WAR 2 GLIDERS ASSTD DESIGNS</td>
+<td>108929</td>
+<td>GBP 24,844</td>
+<td>920</td>
+<td>482</td>
+</tr>
+<tr>
+<td>85099B</td>
+<td>RED RETROSPOT JUMBO BAG</td>
+<td>94809</td>
+<td>GBP 170,298</td>
+<td>3260</td>
+<td>978</td>
+</tr>
+<tr>
+<td>85123A</td>
+<td>WHITE HANGING HEART T-LIGHT HOLDER</td>
+<td>93577</td>
+<td>GBP 251,887</td>
+<td>4895</td>
+<td>1490</td>
+</tr>
+<tr>
+<td>21212</td>
+<td>PACK OF 72 RETROSPOT CAKE CASES</td>
+<td>91175</td>
+<td>GBP 44,019</td>
+<td>2508</td>
+<td>1115</td>
+</tr>
+<tr>
+<td>23843</td>
+<td>PAPER CRAFT , LITTLE BIRDIE</td>
+<td>80995</td>
+<td>GBP 168,470</td>
 <td>1</td>
-<td>12346</td>
-<td>GBP 77,556</td>
-<td>12</td>
-<td>326</td>
-<td>At Risk High Value</td>
+<td>1</td>
 </tr>
 <tr>
-<td>2</td>
-<td>16754</td>
-<td>GBP 67,502</td>
-<td>29</td>
-<td>373</td>
-<td>At Risk High Value</td>
+<td>84879</td>
+<td>ASSORTED COLOUR BIRD ORNAMENT</td>
+<td>79694</td>
+<td>GBP 126,704</td>
+<td>2652</td>
+<td>1010</td>
 </tr>
 <tr>
-<td>3</td>
-<td>17850</td>
-<td>GBP 56,600</td>
-<td>155</td>
-<td>373</td>
-<td>At Risk High Value</td>
+<td>22197</td>
+<td>SMALL POPCORN HOLDER</td>
+<td>77933</td>
+<td>GBP 59,069</td>
+<td>1752</td>
+<td>601</td>
 </tr>
 <tr>
-<td>4</td>
-<td>13093</td>
-<td>GBP 54,944</td>
-<td>55</td>
-<td>276</td>
-<td>At Risk High Value</td>
+<td>23166</td>
+<td>MEDIUM CERAMIC TOP STORAGE JAR</td>
+<td>77916</td>
+<td>GBP 81,417</td>
+<td>195</td>
+<td>138</td>
 </tr>
 <tr>
-<td>5</td>
-<td>15749</td>
-<td>GBP 44,534</td>
-<td>3</td>
-<td>236</td>
-<td>At Risk High Value</td>
+<td>17003</td>
+<td>BROCADE RING PURSE</td>
+<td>71093</td>
+<td>GBP 14,817</td>
+<td>387</td>
+<td>215</td>
 </tr>
 <tr>
-<td>6</td>
-<td>13902</td>
-<td>GBP 34,095</td>
-<td>5</td>
-<td>633</td>
-<td>At Risk High Value</td>
-</tr>
-<tr>
-<td>7</td>
-<td>12482</td>
-<td>GBP 23,691</td>
-<td>29</td>
-<td>577</td>
-<td>At Risk High Value</td>
-</tr>
-<tr>
-<td>8</td>
-<td>14063</td>
-<td>GBP 22,710</td>
-<td>9</td>
-<td>439</td>
-<td>At Risk High Value</td>
-</tr>
-<tr>
-<td>9</td>
-<td>15808</td>
-<td>GBP 18,133</td>
-<td>21</td>
-<td>307</td>
-<td>At Risk High Value</td>
-</tr>
-<tr>
-<td>10</td>
-<td>17448</td>
-<td>GBP 14,524</td>
-<td>46</td>
-<td>498</td>
-<td>At Risk High Value</td>
-</tr>
-<tr>
-<td>11</td>
-<td>15760</td>
-<td>GBP 13,916</td>
-<td>2</td>
-<td>631</td>
-<td>At Risk High Value</td>
-</tr>
-<tr>
-<td>12</td>
-<td>15032</td>
-<td>GBP 13,781</td>
-<td>8</td>
-<td>257</td>
-<td>At Risk High Value</td>
+<td>21977</td>
+<td>PACK OF 60 PINK PAISLEY CAKE CASES</td>
+<td>55101</td>
+<td>GBP 26,656</td>
+<td>1578</td>
+<td>767</td>
 </tr>
 </tbody></table>
-        <div class="note">Targets prioritise high-value inactive customers for CRM testing.</div>
+      </section>
+    </div>
+
+    <div class="grid-2">
+      <section>
+        <h2>Slow-Moving Product Candidates</h2>
+        <figure><img src="../documentation/figures/slow_moving_products.svg" alt="Slow-moving product candidates"></figure>
+        <table>
+<thead><tr>
+<th>stock_code</th>
+<th>product_description</th>
+<th>total_revenue</th>
+<th>days_since_last_sale</th>
+<th>active_months</th>
+</tr></thead><tbody>
+<tr>
+<td>37503</td>
+<td>TEA TIME CAKE STAND IN GIFT BOX</td>
+<td>GBP 23,785</td>
+<td>496</td>
+<td>9</td>
+</tr>
+<tr>
+<td>21527</td>
+<td>RETRO SPOT TRADITIONAL TEAPOT</td>
+<td>GBP 23,566</td>
+<td>209</td>
+<td>18</td>
+</tr>
+<tr>
+<td>79323W</td>
+<td>WHITE CHERRY LIGHTS</td>
+<td>GBP 17,385</td>
+<td>450</td>
+<td>9</td>
+</tr>
+<tr>
+<td>35004C</td>
+<td>SET OF 3 COLOURED  FLYING DUCKS</td>
+<td>GBP 14,730</td>
+<td>278</td>
+<td>16</td>
+</tr>
+<tr>
+<td>85232B</td>
+<td>SET/3 RUSSIAN DOLL STACKING TINS</td>
+<td>GBP 14,019</td>
+<td>302</td>
+<td>15</td>
+</tr>
+<tr>
+<td>47556B</td>
+<td>TEA TIME TEA TOWELS</td>
+<td>GBP 13,363</td>
+<td>236</td>
+<td>14</td>
+</tr>
+<tr>
+<td>79323P</td>
+<td>PINK CHERRY LIGHTS</td>
+<td>GBP 13,198</td>
+<td>333</td>
+<td>7</td>
+</tr>
+<tr>
+<td>85042</td>
+<td>ANTIQUE LILY FAIRY LIGHTS</td>
+<td>GBP 12,081</td>
+<td>389</td>
+<td>12</td>
+</tr>
+<tr>
+<td>22444</td>
+<td>GROW YOUR OWN PLANT IN A CAN</td>
+<td>GBP 11,258</td>
+<td>241</td>
+<td>14</td>
+</tr>
+<tr>
+<td>22198</td>
+<td>POPCORN HOLDER , LARGE</td>
+<td>GBP 11,177</td>
+<td>292</td>
+<td>15</td>
+</tr>
+<tr>
+<td>47570B</td>
+<td>TEA TIME TABLE CLOTH</td>
+<td>GBP 8,895</td>
+<td>256</td>
+<td>16</td>
+</tr>
+<tr>
+<td>21769</td>
+<td>VINTAGE POST OFFICE CABINET</td>
+<td>GBP 8,563</td>
+<td>368</td>
+<td>13</td>
+</tr>
+</tbody></table>
+      </section>
+      <section>
+        <h2>Forecast Table</h2>
+        <table>
+<thead><tr>
+<th>stock_code</th>
+<th>product_description</th>
+<th>next_quarter</th>
+<th>forecast_quantity</th>
+<th>forecast_revenue</th>
+</tr></thead><tbody>
+<tr>
+<td>22423</td>
+<td>REGENCY CAKESTAND 3 TIER</td>
+<td>2012-Q1</td>
+<td>2705.0</td>
+<td>GBP 31,171</td>
+</tr>
+<tr>
+<td>85123A</td>
+<td>WHITE HANGING HEART T-LIGHT HOLDER</td>
+<td>2012-Q1</td>
+<td>8288.0</td>
+<td>GBP 22,736</td>
+</tr>
+<tr>
+<td>85099B</td>
+<td>RED RETROSPOT JUMBO BAG</td>
+<td>2012-Q1</td>
+<td>11006.0</td>
+<td>GBP 20,355</td>
+</tr>
+<tr>
+<td>84879</td>
+<td>ASSORTED COLOUR BIRD ORNAMENT</td>
+<td>2012-Q1</td>
+<td>8251.0</td>
+<td>GBP 13,190</td>
+</tr>
+<tr>
+<td>47566</td>
+<td>PARTY BUNTING</td>
+<td>2012-Q1</td>
+<td>3772.0</td>
+<td>GBP 16,998</td>
+</tr>
+<tr>
+<td>22086</td>
+<td>PAPER CHAIN KIT 50&#x27;S CHRISTMAS</td>
+<td>2012-Q1</td>
+<td>3475.0</td>
+<td>GBP 9,497</td>
+</tr>
+<tr>
+<td>79321</td>
+<td>CHILLI LIGHTS</td>
+<td>2012-Q1</td>
+<td>2044.0</td>
+<td>GBP 10,016</td>
+</tr>
+<tr>
+<td>22386</td>
+<td>JUMBO BAG PINK WITH WHITE SPOTS</td>
+<td>2012-Q1</td>
+<td>4925.0</td>
+<td>GBP 9,110</td>
+</tr>
+<tr>
+<td>21137</td>
+<td>BLACK RECORD COVER FRAME</td>
+<td>2012-Q1</td>
+<td>2391.0</td>
+<td>GBP 8,199</td>
+</tr>
+<tr>
+<td>48138</td>
+<td>DOORMAT UNION FLAG</td>
+<td>2012-Q1</td>
+<td>852.0</td>
+<td>GBP 5,530</td>
+</tr>
+<tr>
+<td>85099F</td>
+<td>JUMBO BAG STRAWBERRY</td>
+<td>2012-Q1</td>
+<td>4085.0</td>
+<td>GBP 7,448</td>
+</tr>
+<tr>
+<td>20685</td>
+<td>RED SPOTTY COIR DOORMAT</td>
+<td>2012-Q1</td>
+<td>885.0</td>
+<td>GBP 5,710</td>
+</tr>
+</tbody></table>
+        <div class="note">Forecast uses the average of the last four quarters for stable high-revenue merchandise products.</div>
       </section>
     </div>
 
     <section>
-      <h2>Cohort Retention Heatmap</h2>
-      <table class='heatmap'><thead><tr><th>Cohort</th><th>M+0</th><th>M+1</th><th>M+2</th><th>M+3</th><th>M+4</th><th>M+5</th><th>M+6</th><th>M+7</th><th>M+8</th><th>M+9</th><th>M+10</th><th>M+11</th><th>M+12</th></tr></thead><tbody><tr><th>2011-01-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(217,225,255)'>16.9%</td><td style='background:rgb(211,219,255)'>21.1%</td><td style='background:rgb(213,221,255)'>19.7%</td><td style='background:rgb(211,219,255)'>21.1%</td><td style='background:rgb(220,228,255)'>15.5%</td><td style='background:rgb(220,228,255)'>15.5%</td><td style='background:rgb(224,232,255)'>12.7%</td><td style='background:rgb(226,234,255)'>11.3%</td><td style='background:rgb(211,219,255)'>21.1%</td><td style='background:rgb(204,212,255)'>25.4%</td><td style='background:rgb(226,234,255)'>11.3%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-02-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(219,227,255)'>16.1%</td><td style='background:rgb(220,228,255)'>15.3%</td><td style='background:rgb(215,223,255)'>18.6%</td><td style='background:rgb(210,218,255)'>21.8%</td><td style='background:rgb(220,228,255)'>15.3%</td><td style='background:rgb(220,228,255)'>15.3%</td><td style='background:rgb(221,229,255)'>14.5%</td><td style='background:rgb(221,229,255)'>14.5%</td><td style='background:rgb(216,224,255)'>17.7%</td><td style='background:rgb(235,243,255)'>5.7%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-03-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(215,223,255)'>18.4%</td><td style='background:rgb(210,218,255)'>21.8%</td><td style='background:rgb(212,220,255)'>20.1%</td><td style='background:rgb(209,217,255)'>22.4%</td><td style='background:rgb(220,228,255)'>15.1%</td><td style='background:rgb(211,219,255)'>20.7%</td><td style='background:rgb(212,220,255)'>20.1%</td><td style='background:rgb(206,214,255)'>24.0%</td><td style='background:rgb(229,237,255)'>9.5%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-04-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(204,212,255)'>25.5%</td><td style='background:rgb(213,221,255)'>19.8%</td><td style='background:rgb(213,221,255)'>19.8%</td><td style='background:rgb(216,224,255)'>17.9%</td><td style='background:rgb(207,215,255)'>23.6%</td><td style='background:rgb(216,224,255)'>17.9%</td><td style='background:rgb(204,212,255)'>25.5%</td><td style='background:rgb(226,234,255)'>11.3%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-05-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(207,215,255)'>23.4%</td><td style='background:rgb(206,214,255)'>24.3%</td><td style='background:rgb(219,227,255)'>16.2%</td><td style='background:rgb(210,218,255)'>21.6%</td><td style='background:rgb(211,219,255)'>20.7%</td><td style='background:rgb(203,211,255)'>26.1%</td><td style='background:rgb(226,234,255)'>11.7%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-06-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(207,215,255)'>23.2%</td><td style='background:rgb(210,218,255)'>21.3%</td><td style='background:rgb(202,210,255)'>26.9%</td><td style='background:rgb(212,220,255)'>20.4%</td><td style='background:rgb(199,207,255)'>28.7%</td><td style='background:rgb(231,239,255)'>8.3%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-07-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(210,218,255)'>21.6%</td><td style='background:rgb(196,204,255)'>30.4%</td><td style='background:rgb(201,209,255)'>27.5%</td><td style='background:rgb(190,198,255)'>34.3%</td><td style='background:rgb(219,227,255)'>15.7%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-08-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(201,209,255)'>27.4%</td><td style='background:rgb(195,203,255)'>31.1%</td><td style='background:rgb(202,210,255)'>26.4%</td><td style='background:rgb(217,225,255)'>17.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-09-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(201,209,255)'>27.0%</td><td style='background:rgb(184,192,255)'>37.6%</td><td style='background:rgb(221,229,255)'>14.8%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-10-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(193,201,255)'>32.1%</td><td style='background:rgb(219,227,255)'>15.8%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-11-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(222,230,255)'>14.1%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr><tr><th>2011-12-01</th><td style='background:rgb(85,93,255)'>100.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td><td style='background:rgb(245,253,255)'>0.0%</td></tr></tbody></table>
-      <div class="note">M+0 is the first purchase month. Later columns show the share of the original cohort that purchased again in each later month.</div>
-    </section>
-
-    <section>
-      <h2>Business Recommendation</h2>
-      <p>Prioritise At Risk High Value customers first, then test campaign impact through a treatment/control split. Track repeat purchase rate, revenue per customer and average order value during the measurement window.</p>
+      <h2>Product Actions</h2>
+      <p>Protect availability for high-revenue products, use high-unit lower-revenue products for bundles and add-ons, review slow-moving products before discounting or delisting, and treat the forecast as a planning baseline rather than a final buying decision.</p>
     </section>
   </main>
 </body>

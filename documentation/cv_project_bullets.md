@@ -2,20 +2,20 @@
 
 ## Short CV version
 
-Customer Retention SQL & Dashboard Project
+Online Retail Product Sales & Demand Analysis
 
-- Cleaned and prepared Online Retail II transaction data into a customer-level analysis dataset of 793k valid transactions and 5,878 customers.
-- Built SQL queries to calculate customer KPIs including total orders, revenue, average order value, repeat purchase behaviour and days since last purchase.
-- Developed RFM segmentation and cohort retention analysis to identify high-value inactive customers and measure repeat purchasing patterns.
-- Created dashboard-ready outputs and an HTML dashboard summarising revenue, customer segments, retention trends and campaign target recommendations.
-- Translated analysis into CRM actions, recommending prioritised retention targeting and an A/B test approach to measure campaign uplift.
+- Built a SQL-driven product sales analysis using 793k cleaned Online Retail II transaction lines, covering 36,969 orders and GBP 17.7m in revenue.
+- Created product-level outputs for units sold, revenue, order count, customer reach, active months, revenue concentration and slow-moving product review.
+- Developed an HR-friendly GitHub report with visual evidence for product catalogue structure, Top 10 revenue products, Top 10 unit products, slow-moving products and next-quarter product forecast.
+- Built a transparent next-quarter baseline for stable high-revenue products using quarterly sales history.
+- Documented data quality checks, assumptions, limitations and evaluation plans so the recommendation can be audited by technical and non-technical reviewers.
 
-## Revolut-focused version
+## Analyst role version
 
-Customer Retention SQL & Dashboard Project
+Online Retail Product Sales & Demand Analysis
 
-- Built a SQL-driven customer analytics project using 793k cleaned retail transactions to produce customer KPIs, RFM segments, cohort retention tables and campaign target outputs.
-- Analysed repeat purchase behaviour, inactive high-value customers and monthly KPI trends to support CRM and product-style decision-making.
-- Produced dashboard-ready CSVs and a browser-based dashboard covering revenue, customers, retention, segment value and prioritised customer targeting.
-- Framed the recommendation as a measurable retention experiment, with treatment/control testing to evaluate uplift in repeat purchase rate and revenue per customer.
-
+- Transformed order-line retail data into product-level decision tables using SQL, Python and pandas.
+- Analysed product performance across revenue, quantity, order reach, customer reach and active selling months to separate revenue drivers from volume drivers.
+- Identified long-tail catalogue structure and slow-moving products with meaningful historical revenue but weak recent sales.
+- Produced dashboard-ready CSVs, SVG charts, a generated HTML dashboard and a narrative GitHub README written as a business report.
+- Framed practical product actions for stock protection, bundling, slow-moving review and demand planning, with a proposed evaluation approach.

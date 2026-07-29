@@ -1,20 +1,19 @@
 # SQL Module
 
-The SQL files define the repeatable analytical logic for the project. The build script runs these files against an in-memory SQLite database created from the cleaned transaction CSV.
+The SQL files define repeatable analytical logic. The build script runs these files against an in-memory SQLite database created from the cleaned transaction CSV.
 
-## Query files
+## Main product query files
 
 | File | Output | Purpose |
 |---|---|---|
-| `00_dataset_overview.sql` | `outputs/dataset_overview.csv` | Overall rows, customers, orders, revenue, and analysis date |
-| `01_customer_kpis.sql` | `outputs/customer_metrics.csv` | Customer-level revenue, order frequency, AOV, first/last purchase dates, recency |
-| `02_rfm_segmentation.sql` | `outputs/rfm_segments.csv` | RFM scores and customer segment labels |
-| `02b_rfm_segment_summary.sql` | `outputs/rfm_segment_summary.csv` | Segment-level customer counts, revenue and average inactivity |
-| `03_cohort_retention.sql` | `outputs/cohort_retention.csv` | Monthly cohort retention matrix input |
-| `04_campaign_targets.sql` | `outputs/campaign_targets.csv` | Prioritised CRM retention target list |
-| `05_monthly_kpis.sql` | `outputs/monthly_kpis.csv` | Monthly dashboard KPI trend |
+| `00_dataset_overview.sql` | `outputs/dataset_overview.csv` | Overall rows, customers, orders, revenue and analysis date |
+| `01_customer_kpis.sql` | `outputs/customer_metrics.csv` | Customer purchase-behaviour metrics used for reach context |
+| `05_monthly_kpis.sql` | `outputs/monthly_kpis.csv` | Monthly revenue, orders, customers, AOV and repeat-purchase context |
 | `06_repeat_customer_summary.sql` | `outputs/repeat_customer_summary.csv` | Repeat-customer extract demonstrating `WHERE` and `HAVING` in context |
 | `07_data_quality_checks.sql` | `outputs/data_quality_checks.csv` | Quality checks across accuracy, validity, timeliness, completeness, consistency and uniqueness |
+| `08_product_performance.sql` | `outputs/product_performance.csv` | Product-level quantity, revenue, orders, customer reach, active months and ranks |
+| `09_product_revenue_concentration.sql` | `outputs/product_revenue_concentration.csv` | Top-N merchandise revenue concentration |
+| `10_product_quarterly_sales.sql` | `outputs/product_quarterly_sales.csv` | Product-by-quarter sales inputs for forecasting |
 
 ## SQL dialect
 

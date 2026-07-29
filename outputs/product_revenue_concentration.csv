@@ -1,0 +1,6 @@
+product_group,top_n,products_in_group,group_revenue,revenue_share
+Top 10,10.0,10,1408930.0,0.0811
+Top 50,50.0,50,3434492.97,0.1976
+Top 100,100.0,100,5181743.17,0.2981
+Top 500,500.0,500,11123897.43,0.64
+All merchandise products,,4626,17381778.32,1.0

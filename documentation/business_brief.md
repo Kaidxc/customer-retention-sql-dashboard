@@ -2,27 +2,26 @@
 
 ## Stakeholder
 
-CRM Marketing Manager at a UK online retailer.
+Merchandising, buying, commercial planning or ecommerce trading team at a UK online retailer.
 
 ## Business situation
 
-The retailer has a limited retention-campaign budget and cannot contact every inactive customer. The marketing team needs a transparent way to identify customers with meaningful historical value who may be at risk of becoming inactive.
+The retailer has a broad product catalogue and two years of order-line history. The business needs to understand which products drive sales, which products create volume, which products appear to be slowing down, and which stable products should be considered in next-quarter planning.
 
 ## Decision supported
 
-Which customers should be prioritised for a retention campaign?
+Which products should be protected, promoted, reviewed, cleared, or forecast for the next quarter?
 
 ## Analytical objective
 
 Use historical transaction data to:
 
-1. Measure customer purchasing behaviour.
-2. Segment customers by recency, frequency and monetary value.
-3. Identify high-value inactive customers.
-4. Build a prioritised campaign target list.
-5. Propose how campaign impact should be measured.
+1. Measure product-level quantity, revenue, order count and customer reach.
+2. Identify top products by revenue and by units sold.
+3. Quantify how concentrated revenue is across the product catalogue.
+4. Flag products with meaningful historical revenue but weak recent sales.
+5. Produce a simple next-quarter forecast baseline for stable high-revenue products.
 
 ## Business recommendation
 
-Prioritise `At Risk High Value` customers before lower-value inactive customers. These customers have demonstrated historical value but have not purchased recently, making them stronger candidates for a retention intervention.
-
+Protect availability for high-revenue products, use high-unit lower-revenue products for basket-building, review slow-moving products before discounting or delisting, and use the product forecast as a planning baseline rather than a final buying decision.

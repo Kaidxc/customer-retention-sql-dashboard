@@ -2,50 +2,56 @@
 
 ## Purpose
 
-The original project identifies which customers should be prioritised. The forecasting extension adds a second question:
+The report first explains what sold historically. The forecasting extension adds a forward-looking question:
 
-> Based on recent monthly performance, what would a simple near-term baseline look like?
+> For stable high-revenue merchandise products, what is a reasonable next-quarter planning baseline?
 
-This is not intended to be a production forecasting model. It is a transparent baseline that demonstrates trend interpretation, forecast accuracy checking and careful communication of uncertainty.
+This is not a production demand-forecasting system. It is an interpretable baseline that shows how historical product sales can be turned into a planning input.
+
+## Why not forecast every product?
+
+The catalogue is long-tailed. Many products sell intermittently, some appear to be seasonal, and some may be discontinued. Forecasting every stock code individually would create false precision.
+
+The project therefore forecasts only products that are:
+
+- merchandise products, not service or administrative lines
+- active across at least 18 months
+- above GBP 10,000 in historical revenue
+- among the top stable high-revenue products
 
 ## Method
 
-The build script creates [`../outputs/monthly_forecast.csv`](../outputs/monthly_forecast.csv) from [`../outputs/monthly_kpis.csv`](../outputs/monthly_kpis.csv).
+The build script creates [`../outputs/product_next_quarter_forecast.csv`](../outputs/product_next_quarter_forecast.csv) from product-level quarterly sales.
 
-The current version uses a 3-month moving average baseline for:
+For each selected product, the baseline:
 
-- monthly revenue
-- monthly repeat purchase rate
-
-For each metric, the script:
-
-1. Uses the previous 3 months to make one-step-ahead backtest predictions.
-2. Calculates validation error using MAE and MAPE.
-3. Forecasts the next 3 months from the most recent rolling average.
-4. Adds a simple lower and upper band using recent backtest error.
+1. Aggregates historical sales into quarters.
+2. Uses the last four quarters as the recent planning window.
+3. Forecasts next-quarter quantity and revenue as the average of those four quarters.
+4. Reports the method and latest-quarter values so the forecast is easy to audit.
 
 ## Generated visual
 
-The same extension also creates:
+The extension creates:
 
 ```text
-documentation/figures/monthly_forecast.svg
+documentation/figures/product_forecast_next_quarter.svg
 ```
 
-This gives a quick visual view of historical monthly revenue and the short-term forecast baseline.
+The chart shows the next-quarter revenue baseline for the highest-priority stable products.
 
 ## How to interpret it
 
-- The forecast is a baseline, not a guarantee.
-- The band is a practical uncertainty guide, not a formal statistical confidence interval.
-- If the forecast is used for a real decision, it should be compared with stronger models and current operational context.
+- Treat the forecast as a starting point for stock and promotion planning, not as an automated buying decision.
+- Review products with seasonality, recent discontinuation, unusual spikes or possible stockouts before acting.
+- Combine this baseline with margin, inventory, supplier lead time and promotion plans in a real business setting.
 
-## Why this helps applications
+## Transferable value
 
-This extension demonstrates skills that are useful across data analyst, BI analyst, performance analyst and insight analyst roles:
+This extension demonstrates skills useful across data analyst, BI analyst, commercial analyst, merchandising analyst and demand planning roles:
 
-- trend analysis
-- time-series thinking
-- forecast accuracy assessment
-- communicating uncertainty
-- explaining the limits of a model
+- product-level time-series aggregation
+- baseline forecasting
+- forecast scope selection
+- uncertainty-aware communication
+- turning analysis into planning recommendations

@@ -1,74 +1,132 @@
-# Customer Retention Prioritisation: Who Should Be Contacted First?
+# Online Retail Product Sales and Demand Analysis
 
-A UK online retailer has two years of transaction history and a familiar commercial problem: some customers have stopped buying, but a retention campaign cannot target everyone. The useful question is not simply what happened in the past. It is:
+A UK online retailer has two years of order-line history. Each row records a product sold within an invoice: what was sold, how many units were bought, when it was bought, at what price, and by which customer ID.
 
-> Which existing customers should be prioritised first, and how should the business measure whether the campaign worked?
+The business question is:
 
-This analysis turns cleaned transaction data into customer-level KPIs, retention evidence, a ranked campaign list and an evaluation plan.
+> Which products are driving sales, which products are slowing down, and what should the business plan for next quarter?
 
-## The data
+This report focuses on product sales and demand. Customer IDs are used only as purchase-behaviour context, because the dataset does not contain demographic customer information such as age, gender, occupation, membership tier or marketing channel.
 
-The project uses the UCI Online Retail II dataset, a historical transaction dataset from a UK-based online retailer. Each row is a transaction line rather than a complete order. The fields include invoice ID, product, quantity, transaction date, unit price, customer ID and country.
+## Data Overview
 
-The analysis uses a cleaned customer-level version of the data:
+The project uses the UCI Online Retail II dataset, cleaned into transaction-line records for analysis.
 
 | Dataset feature | Value |
 |---|---:|
 | Transaction period | 2009-12-01 to 2011-12-09 |
-| Clean transaction rows | 793,609 |
+| Clean transaction lines | 793,609 |
 | Distinct orders | 36,969 |
 | Known customers | 5,878 |
+| Stock codes | 4,631 |
+| Merchandise products | 4,626 |
+| Countries/regions | 41 |
 | Clean revenue | GBP 17.7m |
-| Analysis date | 2011-12-10 |
 
-Cancelled or unusable records were removed before analysis, including rows with missing customer IDs, non-positive quantities or prices, duplicate transaction lines and records that could not support customer-level targeting. The source and cleaning notes are in [`data/README.md`](data/README.md), and field definitions are in [`documentation/data_dictionary.md`](documentation/data_dictionary.md).
-
-## From transactions to customer profiles
-
-The raw data records what was bought. The decision needs to understand who the customers are. The analysis therefore restructures transaction lines into customer-level profiles.
+The raw dataset is a sales-order table at product-line level. One invoice can appear across many rows if the customer bought multiple products in the same order.
 
 | Layer | What it represents | Example fields |
 |---|---|---|
-| Transaction line | One product line within an invoice | invoice ID, product, quantity, unit price, line value |
-| Order | One completed customer purchase | invoice ID, customer ID, order date, order value |
-| Customer profile | One row per customer for decision-making | total orders, total revenue, average order value, first purchase, last purchase, days since last purchase, repeat flag |
-| Campaign target | A prioritised customer for testing | priority rank, customer ID, value, inactivity, target reason |
+| Transaction line | One product line inside an invoice | invoice, stock code, quantity, unit price, line value |
+| Order | One completed customer purchase | invoice, customer ID, order date, order value |
+| Product | One stock item aggregated across sales | units sold, revenue, orders, customers, active months |
+| Planning item | A product selected for action | top seller, slow-moving candidate, forecast item |
 
-The key customer features used in the analysis are:
+Cleaning removed cancelled or unusable records, missing customer IDs, non-positive quantities or prices, duplicate transaction lines and rows that could not support sales analysis. Source and cleaning notes are in [`data/README.md`](data/README.md).
 
-- **Frequency:** how many completed orders a customer placed.
-- **Monetary value:** how much revenue the customer generated historically.
-- **Average order value:** typical value per completed order.
-- **Recency:** how many days have passed since the customer's last purchase.
-- **Repeat status:** whether the customer bought once or returned for at least one more order.
-- **RFM segment:** a combined view of recency, frequency and monetary value.
+## Sales Trend Context
 
-## Customer profile after cleaning
+Before deciding which products to protect, promote or review, the business needs a view of overall sales movement. Monthly revenue and order volume show the trading backdrop behind the product recommendations.
 
-The cleaned customer base contains **5,878 known customers**. It is not evenly distributed: a large group has low order frequency or long inactivity, while a smaller group contributes much higher historical value. This uneven structure is the reason a prioritisation rule is needed.
+![Monthly sales and order trend](documentation/figures/monthly_kpis.svg)
 
-![Customer profile after cleaning](documentation/figures/customer_profile_overview.svg)
+The monthly pattern is not flat, so product decisions should be reviewed with timing and seasonality in mind. This is why the report separates historical product ranking from the next-quarter planning baseline.
 
-Some important patterns:
+## Executive Recommendation
 
-- **4,255 customers** are repeat customers, while **1,623 customers** placed only one order.
-- The median customer placed **3 orders**, but the top 5% placed **21 or more** orders.
-- Median customer revenue is **GBP 887**, while the top 5% generated more than **GBP 9,505**.
-- Median inactivity is **96 days**, but **1,614 customers** have not purchased for more than a year.
+The business should manage products in four groups:
 
-## Recommendation
+1. **Protect stock for high-revenue products.** These products drive income and need availability planning.
+2. **Use high-unit products for bundles and add-ons.** Some products sell many units but generate lower revenue, so they can support basket-building.
+3. **Review slow-moving products before discounting or delisting.** Several products have meaningful historical revenue but no sale for at least 180 days.
+4. **Forecast only stable high-revenue products individually.** The full catalogue is too sparse and long-tailed for useful product-by-product forecasting.
 
-Prioritise the `At Risk High Value` segment for the first retention test.
+## What the Product Catalogue Looks Like
 
-This segment contains **397 customers** with meaningful historical spend who have not purchased recently. Together, they represent **GBP 1.47m** in historical revenue. From this group, the analysis produces a ranked list of **300 customers** as a practical test population for a retention campaign.
+The catalogue is broad and long-tailed. Many products sell only intermittently, while a smaller group sells consistently across many months.
 
-This recommendation is not framed as proof that a campaign will create extra revenue. It identifies the strongest starting group for a controlled test.
+![Product catalogue overview](documentation/figures/product_catalog_overview.svg)
 
-## How the analysis leads to the recommendation
+Important patterns:
 
-### 1. First, check whether the data is reliable enough to use
+- There are **4,626 merchandise products** after excluding service/admin lines such as postage and manual adjustments.
+- The top **10** merchandise products account for **8.1%** of merchandise revenue.
+- The top **100** merchandise products account for **29.8%** of merchandise revenue.
+- The top **500** merchandise products account for **64.0%** of merchandise revenue.
+- This means the business has a meaningful core range, but also a large long tail that should not be forecast or managed product-by-product in the same way.
 
-Customer prioritisation is sensitive to bad identifiers, duplicate records and incorrect revenue values. Before building the recommendation, the cleaned analytical table is checked against six data quality dimensions.
+## Top Products by Revenue
+
+Revenue ranking identifies products that matter most commercially. These should be protected from stockouts and reviewed for margin, placement and promotion.
+
+![Top products by revenue](documentation/figures/top_products_by_revenue.svg)
+
+The top revenue product is **REGENCY CAKESTAND 3 TIER** (`22423`), generating **GBP 285,992** from **24,858 units**.
+
+## Top Products by Units Sold
+
+Unit ranking tells a different story. These products create volume and basket activity, but they are not always the highest revenue drivers.
+
+![Top products by quantity](documentation/figures/top_products_by_quantity.svg)
+
+The top unit product is **WORLD WAR 2 GLIDERS ASSTD DESIGNS** (`84077`), with **108,929 units** sold but only **GBP 24,844** in revenue. This is a useful candidate for basket-building, add-on offers or volume-led merchandising rather than premium revenue focus.
+
+## Products That Need Review
+
+Slow-moving products are not simply products with low sales. This report flags products with meaningful historical revenue but no sale for at least 180 days.
+
+![Slow-moving product candidates](documentation/figures/slow_moving_products.svg)
+
+These products should be reviewed before taking action:
+
+- If stock remains, consider clearance, bundling or targeted promotion.
+- If the product is discontinued, remove it from active planning assumptions.
+- If the product was seasonal, compare it against the same season before treating it as weak demand.
+
+The generated list is in [`outputs/slow_moving_product_candidates.csv`](outputs/slow_moving_product_candidates.csv).
+
+## Next-Quarter Product Forecast
+
+Forecasting every product would be misleading because many products are sparse, seasonal or discontinued. Instead, the forecast is limited to stable high-revenue merchandise products.
+
+The current baseline uses the average of the last four quarters. For the top 20 stable products, the next-quarter baseline for **2012-Q1** is:
+
+| Forecast scope | Baseline |
+|---|---:|
+| Products forecast individually | 20 |
+| Forecast units | 76,320 |
+| Forecast revenue | GBP 205,589 |
+
+![Next-quarter product forecast](documentation/figures/product_forecast_next_quarter.svg)
+
+This is a planning baseline, not a production demand model. It is useful for identifying where a buyer, merchandising or operations team should start reviewing stock and promotion plans.
+
+## Customer Purchase Behaviour as Context
+
+The dataset has `customer_id`, so customer behaviour can help explain demand breadth, but it should not be treated as demographic profiling.
+
+Useful customer-related questions include:
+
+- How many unique customers bought each product?
+- Are high-revenue products bought by many customers or a small number of buyers?
+- Which products appear in many orders and support basket-building?
+- Which products are associated with repeat purchasing?
+
+For example, **WHITE HANGING HEART T-LIGHT HOLDER** (`85123A`) appears in **4,895 orders** and reaches **1,490 customers**, making it both a high-revenue product and a broad-demand product.
+
+## Data Quality Checks
+
+Before product analysis, the cleaned table is checked across six dimensions.
 
 | Dimension | Check | Result |
 |---|---|---|
@@ -79,113 +137,46 @@ Customer prioritisation is sensitive to bad identifiers, duplicate records and i
 | Consistency | Invoices map to one customer | Pass |
 | Uniqueness | No exact duplicate transaction lines | Pass |
 
-The SQL behind these checks is in [`sql/07_data_quality_checks.sql`](sql/07_data_quality_checks.sql), with generated results in [`outputs/data_quality_checks.csv`](outputs/data_quality_checks.csv).
+Generated results: [`outputs/data_quality_checks.csv`](outputs/data_quality_checks.csv).
 
-### 2. Then, show why retention is worth investigating
+## Analytical Outputs
 
-Across known customers, the repeat-customer rate is **72.4%**, so repeat purchasing is an important part of the revenue base. At the same time, cohort retention weakens after the first purchase month: average month 1 to month 3 retention is **21.6%**.
+Main product outputs:
 
-![Cohort retention heatmap](documentation/figures/cohort_retention.svg)
+- [`outputs/product_performance.csv`](outputs/product_performance.csv) - product-level units, revenue, orders, customers and active months.
+- [`outputs/product_revenue_concentration.csv`](outputs/product_revenue_concentration.csv) - Top 10/50/100/500 revenue concentration.
+- [`outputs/top_products_by_revenue.csv`](outputs/top_products_by_revenue.csv) - Top 10 merchandise products by revenue.
+- [`outputs/top_products_by_quantity.csv`](outputs/top_products_by_quantity.csv) - Top 10 merchandise products by units sold.
+- [`outputs/slow_moving_product_candidates.csv`](outputs/slow_moving_product_candidates.csv) - products with historical revenue but no recent sales.
+- [`outputs/product_next_quarter_forecast.csv`](outputs/product_next_quarter_forecast.csv) - next-quarter baseline for stable high-revenue products.
+- [`outputs/executive_summary.md`](outputs/executive_summary.md) - generated report summary.
 
-This suggests that customer lifecycle behaviour matters. A useful retention action should therefore be measured over a defined post-campaign window rather than judged only by immediate sales.
+Supporting outputs:
 
-### 3. Identify where value and inactivity overlap
+- [`outputs/monthly_kpis.csv`](outputs/monthly_kpis.csv) - monthly revenue, orders, customers and repeat-purchase context.
+- [`outputs/customer_metrics.csv`](outputs/customer_metrics.csv) - customer purchase behaviour metrics.
+- [`outputs/data_quality_checks.csv`](outputs/data_quality_checks.csv) - generated quality checks.
 
-The largest historical value sits with active `Champions`, but the better intervention opportunity is different: customers who have already shown value and are now inactive.
-
-![Segment revenue by RFM group](documentation/figures/segment_revenue.svg)
-
-The `At Risk High Value` segment is selected because it combines two signals:
-
-- high monetary value from previous purchases
-- low recency, meaning the customer has not purchased recently
-
-That makes it a clearer first test group than contacting every inactive customer or focusing only on already-active high spenders.
-
-### 4. Turn the segment into an action list
-
-The decision rule keeps the recommendation operational: customers must have low recency, high monetary value and at least two historical orders. The output is a ranked list that a CRM or marketing team could test.
-
-![Campaign decision funnel](documentation/figures/campaign_funnel.svg)
-
-The final list is available in [`outputs/campaign_targets.csv`](outputs/campaign_targets.csv).
-
-### 5. Use monthly performance as context, not as the targeting rule
-
-Monthly revenue and repeat-purchase behaviour are volatile. They help explain the trading context, but they do not tell the team which customers to contact.
-
-![Monthly revenue and repeat-purchase KPIs](documentation/figures/monthly_kpis.svg)
-
-For planning context, a simple 3-month moving average baseline forecasts:
-
-| Forecast month | Revenue baseline | Repeat-purchase baseline |
-|---|---:|---:|
-| 2012-01 | GBP 903k | 24.5% |
-| 2012-02 | GBP 859k | 24.7% |
-| 2012-03 | GBP 760k | 22.1% |
-
-![Monthly revenue forecast baseline](documentation/figures/monthly_forecast.svg)
-
-The forecast is deliberately simple and transparent. It is a planning baseline, not a production forecasting model. Method notes are in [`documentation/forecasting_extension.md`](documentation/forecasting_extension.md), and the generated output is in [`outputs/monthly_forecast.csv`](outputs/monthly_forecast.csv).
-
-## How campaign impact should be measured
-
-Historical transaction data can identify a sensible priority group, but it cannot prove that a campaign caused customers to return. The next step should be a controlled test.
-
-| Element | Plan |
-|---|---|
-| Eligible population | At Risk High Value customers with at least two previous orders |
-| Test design | Random treatment/control split |
-| Treatment group | Receives the retention campaign |
-| Control group | Does not receive the campaign during the test window |
-| Primary metric | Repeat purchase rate |
-| Secondary metrics | Revenue per customer, average order value and order count |
-| Guardrails | Contact cost, opt-outs, contact failures and complaints if available |
-
-The full evaluation plan is in [`documentation/evaluation_plan.md`](documentation/evaluation_plan.md).
-
-## Analytical methods used
-
-| Area | What the project demonstrates |
-|---|---|
-| SQL analysis | Customer KPIs, RFM segmentation, cohort retention, campaign targets and data quality checks |
-| KPI design | Revenue, orders, customers, AOV, repeat purchase rate, recency and retention |
-| Data quality | Accuracy, validity, timeliness, completeness, consistency and uniqueness checks |
-| Forecasting | Moving-average baseline, backtest error and practical forecast bands |
-| Evaluation | Treatment/control design and clear causality limitations |
-| Reporting | Plain-language recommendation supported by charts, outputs and reproducible logic |
-
-More detail is in [`documentation/skills_demonstrated.md`](documentation/skills_demonstrated.md).
-
-## Data-to-decision workflow
+## Data-to-Decision Workflow
 
 ```mermaid
 flowchart LR
-    A[Clean transaction data] --> B[Data quality checks]
-    B --> C[Customer KPIs]
-    C --> D[RFM segmentation]
-    C --> E[Cohort retention]
-    C --> F[Monthly trends]
-    F --> G[Forecast baseline]
-    D --> H[Campaign target list]
-    E --> I[Evaluation plan]
-    G --> I
-    H --> I
-    I --> J[Retention recommendation]
+    A[Clean transaction lines] --> B[Data quality checks]
+    B --> C[Product performance table]
+    C --> D[Top products by revenue]
+    C --> E[Top products by units]
+    C --> F[Revenue concentration]
+    C --> G[Slow-moving product review]
+    C --> H[Stable product forecast]
+    H --> I[Next-quarter planning baseline]
+    D --> J[Product actions]
+    E --> J
+    F --> J
+    G --> J
+    I --> J
 ```
 
-## Key outputs
-
-- [`outputs/executive_summary.md`](outputs/executive_summary.md) - generated one-page decision summary.
-- [`dashboard/customer_retention_dashboard.html`](dashboard/customer_retention_dashboard.html) - generated HTML dashboard.
-- [`outputs/customer_profile_summary.csv`](outputs/customer_profile_summary.csv) - customer feature distributions used in the profile overview.
-- [`outputs/campaign_targets.csv`](outputs/campaign_targets.csv) - ranked list of 300 campaign candidates.
-- [`outputs/rfm_segment_summary.csv`](outputs/rfm_segment_summary.csv) - segment-level customer and revenue summary.
-- [`outputs/monthly_kpis.csv`](outputs/monthly_kpis.csv) - monthly revenue, order, customer, AOV and repeat-purchase KPIs.
-- [`outputs/monthly_forecast.csv`](outputs/monthly_forecast.csv) - short-term forecast baseline.
-- [`outputs/data_quality_checks.csv`](outputs/data_quality_checks.csv) - generated quality checks.
-
-## Reproduce the analysis
+## Reproduce the Analysis
 
 The build expects the cleaned transaction file from the companion cleaning project by default:
 
@@ -200,23 +191,12 @@ pip install -r requirements.txt
 python scripts/build_customer_retention_outputs.py
 ```
 
-The script generates the SQL outputs, executive summary, dashboard and SVG figures.
+The script generates SQL outputs, product CSVs, the HTML dashboard, SVG figures and the executive summary.
 
-## Repository map
+## Limitations and Next Steps
 
-```text
-sql/                 SQL transformations and quality checks
-scripts/             reproducible output, forecast, dashboard and chart generation
-outputs/             CSV extracts, metrics, forecast and executive summary
-documentation/       business brief, data dictionary, analysis notes and application-ready explanations
-dashboard/           generated HTML dashboard
-data/                source and cleaning notes
-```
-
-## Limitations and next steps
-
-- Transaction history shows association, not campaign causality.
-- Revenue is used instead of profit because margin and campaign cost are not available.
-- Channel permissions, contact history and campaign history are not available.
-- The forecast is a transparent baseline, not a production model.
-- A production version would add margin, contact permissions, campaign cost, customer consent, Power BI deployment and a persisted CRM-ready table.
+- The dataset contains product and transaction behaviour, not customer demographic attributes.
+- Revenue is used instead of profit because product cost and margin are not available.
+- Stock levels are not available, so slow-moving analysis cannot confirm whether a product was unavailable or simply not demanded.
+- Forecasting is limited to stable high-revenue products; sparse long-tail products should be managed by category or lifecycle rules.
+- A production version should add inventory, margin, product category, promotion history and current stock availability.

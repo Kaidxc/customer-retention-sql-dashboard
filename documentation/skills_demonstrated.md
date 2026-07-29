@@ -1,51 +1,51 @@
 # Skills Demonstrated
 
-This project is designed to be readable for non-technical reviewers while still showing the analytical skills behind the recommendation.
+This project is written as a product sales and demand analysis report for non-technical stakeholders, with SQL and generated outputs available for technical review.
 
 ## Business and stakeholder skills
 
 | Skill | Evidence in the project |
 |---|---|
-| Problem framing | Starts from a clear prioritisation question rather than a tool-first exercise. |
-| Decision support | Produces a ranked campaign target list and a recommended action. |
-| Stakeholder communication | Uses an executive summary, plain-language README and visual evidence. |
-| Evaluation thinking | Separates a prioritisation hypothesis from proof of campaign impact. |
-| Limitation handling | Documents missing margin, campaign cost, contact permission and causality limitations. |
+| Problem framing | Starts from product planning questions: what sells, what slows down, and what should be planned next. |
+| Decision support | Produces product actions for stock protection, bundling, slow-moving review and forecasting. |
+| Stakeholder communication | Uses a plain-language report, executive summary and visual evidence. |
+| Limitation handling | Explains missing margin, inventory, product category and customer demographic data. |
+| Commercial interpretation | Separates high-revenue products from high-unit products and slow-moving candidates. |
 
 ## Data analysis skills
 
 | Skill | Evidence in the project |
 |---|---|
-| SQL transformation | Customer KPIs, RFM segmentation, cohort retention, campaign targeting and monthly KPIs. |
-| KPI design | Revenue, orders, customers, AOV, repeat purchase rate, recency and retention. |
-| Segmentation | RFM scoring and customer groups linked to action. |
-| Cohort analysis | Monthly retention table and heatmap-ready output. |
-| Forecasting | 3-month moving average baseline, backtest error and forecast bands. |
+| SQL transformation | Product performance, revenue concentration, quarterly sales, monthly KPIs and data quality checks. |
+| KPI design | Units sold, revenue, order count, customer reach, active months, average selling price and days since last sale. |
+| Product analysis | Top products by revenue, Top products by quantity, catalogue long-tail structure and slow-moving candidates. |
+| Forecasting | Last-four-quarter average baseline for stable high-revenue merchandise products. |
 | Data quality | Checks mapped to accuracy, validity, timeliness, completeness, consistency and uniqueness. |
+| Customer-behaviour context | Uses customer IDs only for purchase reach and repeat-behaviour context, not demographic profiling. |
 
 ## Technical skills
 
 | Skill | Evidence in the project |
 |---|---|
 | Python | Reproducible build script for outputs, summary files, dashboard and SVG figures. |
-| pandas | Data loading, output generation, summary metrics and forecast extension. |
+| pandas | Data loading, product output generation, summary metrics and forecast extension. |
 | SQLite | Local database engine used to run repeatable SQL without a server dependency. |
 | Dashboarding | Generated HTML dashboard plus dashboard-ready CSVs for Power BI, Tableau or Excel. |
-| Documentation | Data dictionary, analysis notes, business brief, evaluation plan and CV-ready bullets. |
+| Documentation | Business brief, data dictionary, analysis notes, data quality notes and CV-ready bullets. |
 
 ## Transferable roles
 
 The same project can support applications for:
 
 - Data Analyst
-- Insight Analyst
 - BI Analyst
+- Product Analyst
+- Commercial Analyst
+- Merchandising Analyst
+- Demand Planning Analyst
 - Performance Analyst
-- Evaluation Analyst
-- CRM Analyst
-- Customer Insight Analyst
-- Operations Analyst
+- Insight Analyst
 
 The core transferable story is:
 
-> I can start with a practical question, check the data, build the analysis, communicate the evidence, recommend an action and explain how that action should be evaluated.
+> I can start with a practical business question, check the data, build product-level analysis, communicate what matters, and create a transparent planning baseline.

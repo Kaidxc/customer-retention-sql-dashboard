@@ -2,45 +2,40 @@
 
 ## Objective
 
-Identify which existing customers should be prioritised for a retention campaign when marketing budget is limited.
+Analyse online retail transaction lines to understand product sales structure, identify the strongest and weakest product opportunities, and create a practical next-quarter planning baseline.
 
 ## Dataset
 
 - Analysis date: 2011-12-10
 - Clean transaction rows: 793,609
-- Distinct customers: 5,878
 - Distinct orders: 36,969
+- Known customers: 5,878
+- Stock codes: 4,631
+- Merchandise products: 4,626
 - Total clean revenue: GBP 17,685,461
 
 ## Key findings
 
-- Repeat purchase rate across known customers is 72.4%.
-- Customer base: 4,255 repeat customers and 1,623 one-time customers.
-- Median customer profile: 3 orders, GBP 887 revenue and 96 days since last purchase.
-- The highest revenue RFM segment is `Champions`, contributing GBP 12,156,257.
-- `397` customers are classified as `At Risk High Value`, representing GBP 1,465,866 in historical revenue.
-- The campaign target list contains `300` customers prioritised by historical value, order frequency, and inactivity.
-- Average month 1 to 3 cohort retention is 21.6%.
-- Data quality checks passed: 6/6.
-- Next-month revenue baseline forecast: GBP 903,019 for 2012-01-01.
+- Product sales follow a long-tail pattern: the top 10 merchandise products contribute 8.1% of merchandise revenue, while the top 500 contribute 64.0%.
+- Top revenue product: `REGENCY CAKESTAND 3 TIER` (22423), generating GBP 285,992.
+- Top quantity product: `WORLD WAR 2 GLIDERS ASSTD DESIGNS` (84077), with 108,929 units sold.
+- Broadest-reach product: `WHITE HANGING HEART T-LIGHT HOLDER` (85123A), appearing in 4,895 orders from 1,490 customers.
+- 25 high-history-revenue merchandise products have not sold for at least 180 days and should be reviewed for clearance, bundling, relisting or delisting.
+- Next-quarter baseline for 20 stable high-revenue merchandise products: 76,320 units and GBP 205,589 revenue in 2012-Q1.
+- Customer IDs support demand context, but the dataset does not contain demographic customer features such as age, gender or occupation.
 
-## Recommended CRM action
+## Recommended product actions
 
-Prioritise the `At Risk High Value` segment first. These customers have meaningful historical spend but have not purchased recently, making them better candidates for a targeted retention campaign than low-value inactive customers.
+Protect stock availability for high-revenue products, use high-volume lower-revenue products for bundle and add-on opportunities, review slow-moving products before discounting or delisting, and use the next-quarter product forecast as a planning baseline rather than a final buying decision.
 
 ## Evidence for decision-makers
 
-- [Customer profile overview](../documentation/figures/customer_profile_overview.svg) shows the cleaned customer base by repeat status, order frequency, revenue and inactivity.
-- [Segment revenue view](../documentation/figures/segment_revenue.svg) shows where historical value is concentrated and highlights the retention opportunity.
-- [Monthly KPI trend](../documentation/figures/monthly_kpis.svg) shows how revenue and monthly repeat purchasing change over time.
-- [Monthly forecast baseline](../documentation/figures/monthly_forecast.svg) shows a transparent short-term revenue planning baseline.
-- [Cohort retention heatmap](../documentation/figures/cohort_retention.svg) shows the drop-off in repeat purchasing after the first purchase month.
-- [Campaign decision funnel](../documentation/figures/campaign_funnel.svg) shows how the campaign scope narrows from the full customer base to a testable target list.
-
-## Measurement recommendation
-
-Run an A/B test on the campaign target list. Randomly assign eligible customers into treatment and control groups, then compare repeat purchase rate, revenue per customer, and average order value over a fixed measurement window.
+- [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows catalogue breadth, active-month distribution and revenue concentration.
+- [Top products by revenue](../documentation/figures/top_products_by_revenue.svg) highlights the products driving income.
+- [Top products by quantity](../documentation/figures/top_products_by_quantity.svg) highlights the products driving unit demand.
+- [Slow-moving product candidates](../documentation/figures/slow_moving_products.svg) shows products with historical value but weak recent sales.
+- [Next-quarter product forecast](../documentation/figures/product_forecast_next_quarter.svg) provides a simple planning baseline for stable high-revenue products.
 
 ## Forecasting note
 
-The forecasting extension uses a transparent 3-month moving average baseline for short-term planning. This is useful for trend interpretation, but should not be treated as a production forecasting model without additional validation and business context.
+The product forecast uses an average of the last four quarters and is limited to stable high-revenue merchandise products. It is designed as an interpretable planning baseline, not a production demand-forecasting model.
