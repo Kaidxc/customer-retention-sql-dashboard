@@ -15,6 +15,7 @@ The SQL files define repeatable analytical logic. The build script runs these fi
 | `08_product_performance.sql` | `outputs/product_performance.csv` | Product-level quantity, revenue, orders, customer reach, active months and ranks |
 | `09_product_revenue_concentration.sql` | `outputs/product_revenue_concentration.csv` | Top-N merchandise revenue concentration |
 | `10_product_quarterly_sales.sql` | `outputs/product_quarterly_sales.csv` | Product-by-quarter sales inputs for forecasting |
+| `11_country_sales_context.sql` | `outputs/country_sales_context.csv` | Country/region revenue, orders, customers and domestic/international context |
 
 ## SQL dialect
 

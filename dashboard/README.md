@@ -7,10 +7,10 @@
 It contains:
 
 - Executive KPIs: revenue, merchandise products, orders and Top 500 revenue share.
-- Product range snapshot, customer purchase behaviour and monthly sales context.
+- Product range snapshot, customer purchase behaviour, geographic sales context and monthly sales context.
 - Top products by revenue and units sold.
 - Slow-moving product candidates.
-- Next-quarter forecast baseline for stable high-revenue products.
+- Next-quarter forecast baseline and forecast backtest for stable high-revenue products.
 - Product action cards for stock, basket, review and planning decisions.
 
 The repository homepage also includes static SVG versions of the key visuals so that the business story is visible directly on GitHub without opening the HTML file.
@@ -27,6 +27,8 @@ For a Power BI version, import these files from `../outputs`:
 - `slow_moving_product_candidates.csv`
 - `product_quarterly_sales.csv`
 - `product_next_quarter_forecast.csv`
+- `product_forecast_backtest.csv`
+- `country_sales_context.csv`
 - `monthly_kpis.csv`
 - `customer_profile_summary.csv`
 - `purchase_behavior_summary.csv`
@@ -38,8 +40,9 @@ Recommended pages:
 2. Customer and Purchases - repeat status, orders per customer, order value and basket size.
 3. Product Leaders - Top products by revenue and units sold.
 4. Catalogue Health - active months, low-revenue products and slow-moving candidates.
-5. Forecast - next-quarter baseline for stable high-revenue products.
-6. Data Quality - quality checks and cleaning assumptions.
+5. Geographic Sales Context - domestic/international split and country/region concentration.
+6. Forecast - next-quarter baseline and backtest error for stable high-revenue products.
+7. Data Quality - quality checks and cleaning assumptions.
 
 ## Suggested visuals
 
@@ -49,3 +52,5 @@ Recommended pages:
 - Concentration chart for Top 10/50/100/500 revenue share.
 - Bar chart for slow-moving product candidates.
 - Forecast bar chart for stable high-revenue products.
+- Forecast validation chart using MAE, MAPE and bias.
+- Country/region revenue map or ranked bar chart.

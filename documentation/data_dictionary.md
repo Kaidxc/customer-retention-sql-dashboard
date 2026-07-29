@@ -61,6 +61,29 @@
 | `latest_quarter_quantity` | Units sold in the latest observed quarter for the forecasted product. |
 | `latest_quarter_revenue` | Revenue in the latest observed quarter for the forecasted product. |
 | `method` | Forecasting method used for the baseline. |
+| `revenue_mae` | Mean absolute revenue error from product forecast backtesting. |
+| `revenue_mape` | Mean absolute percentage revenue error from product forecast backtesting. |
+| `revenue_bias` | Average revenue forecast bias, calculated as predicted minus actual. |
+| `quantity_mae` | Mean absolute unit error from product forecast backtesting. |
+| `quantity_mape` | Mean absolute percentage unit error from product forecast backtesting. |
+| `quantity_bias` | Average unit forecast bias, calculated as predicted minus actual. |
+| `validation_quarters` | Number of historical quarters used to test the product forecast baseline. |
+
+## Geographic sales outputs
+
+| Metric | Definition |
+|---|---|
+| `country` | Customer country or region recorded on the transaction. |
+| `transaction_lines` | Number of transaction lines for the country/region. |
+| `order_count` | Number of distinct invoices for the country/region. |
+| `customer_count` | Number of distinct known customers for the country/region. |
+| `units_sold` | Total units sold for the country/region. |
+| `revenue` | Total sales value for the country/region. |
+| `revenue_share` | Country/region revenue divided by total analysed revenue. |
+| `order_share` | Country/region order count divided by total orders across countries. |
+| `customer_share` | Country/region customer count divided by total customers across countries. |
+| `market_group` | `Domestic` for United Kingdom and `International` for all other countries/regions. |
+| `revenue_rank` | Country/region rank by revenue. |
 
 ## Customer and purchase behaviour summaries
 

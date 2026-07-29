@@ -39,5 +39,14 @@
   "forecast_product_count": 20,
   "next_product_forecast_quarter": "2012-Q1",
   "forecast_top_product_revenue": 205589.49000000002,
-  "forecast_top_product_quantity": 76320.0
+  "forecast_top_product_quantity": 76320.0,
+  "top_country": "United Kingdom",
+  "top_country_revenue": 14666669.08,
+  "top_country_revenue_share": 0.8293,
+  "domestic_revenue_share": 0.8293065913605743,
+  "international_revenue_share": 0.17069340863942573,
+  "countries_represented": 41,
+  "forecast_median_revenue_mape": 0.47945000000000004,
+  "forecast_median_revenue_mae": 3766.87,
+  "forecast_validation_quarters": 5
 }

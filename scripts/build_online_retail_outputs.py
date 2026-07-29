@@ -33,6 +33,7 @@ QUERY_OUTPUTS = {
     "08_product_performance.sql": "product_performance.csv",
     "09_product_revenue_concentration.sql": "product_revenue_concentration.csv",
     "10_product_quarterly_sales.sql": "product_quarterly_sales.csv",
+    "11_country_sales_context.sql": "country_sales_context.csv",
 }
 
 
@@ -352,14 +353,23 @@ def generate_product_report_outputs(outputs: dict[str, pd.DataFrame]) -> dict[st
     }
 
 
+def select_forecast_products(outputs: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    performance = outputs["product_performance.csv"].copy()
+    return (
+        performance[
+            (performance["stock_line_type"] == "merchandise")
+            & (performance["active_months"] >= 18)
+            & (performance["total_revenue"] >= 10000)
+        ]
+        .sort_values("total_revenue", ascending=False)
+        .head(20)
+        .copy()
+    )
+
+
 def generate_product_quarterly_forecast(outputs: dict[str, pd.DataFrame]) -> pd.DataFrame:
     quarterly = outputs["product_quarterly_sales.csv"].copy()
-    performance = outputs["product_performance.csv"].copy()
-    merchandise = performance[
-        (performance["stock_line_type"] == "merchandise")
-        & (performance["active_months"] >= 18)
-        & (performance["total_revenue"] >= 10000)
-    ].sort_values("total_revenue", ascending=False).head(20)
+    merchandise = select_forecast_products(outputs)
 
     quarter_periods = pd.PeriodIndex(
         [str(q).replace("-Q", "Q") for q in quarterly["sale_quarter"].unique()],
@@ -410,6 +420,90 @@ def generate_product_quarterly_forecast(outputs: dict[str, pd.DataFrame]) -> pd.
     return forecast
 
 
+def generate_product_forecast_backtest(outputs: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    quarterly = outputs["product_quarterly_sales.csv"].copy()
+    forecast_products = select_forecast_products(outputs)
+
+    quarter_periods = pd.PeriodIndex(
+        [str(q).replace("-Q", "Q") for q in quarterly["sale_quarter"].unique()],
+        freq="Q",
+    ).sort_values()
+    if len(quarter_periods) <= 4:
+        backtest = pd.DataFrame()
+        backtest.to_csv(OUTPUT_DIR / "product_forecast_backtest.csv", index=False)
+        return backtest
+
+    rows: list[dict[str, object]] = []
+    for product in forecast_products.itertuples(index=False):
+        product_rows = quarterly[quarterly["stock_code"] == product.stock_code].copy()
+        product_rows["period"] = pd.PeriodIndex(
+            [str(q).replace("-Q", "Q") for q in product_rows["sale_quarter"]],
+            freq="Q",
+        )
+        product_rows = product_rows.set_index("period")
+        aligned = product_rows.reindex(quarter_periods).fillna(
+            {
+                "quantity_sold": 0,
+                "revenue": 0,
+                "order_count": 0,
+                "customer_count": 0,
+            }
+        )
+
+        revenue_errors: list[float] = []
+        revenue_pct_errors: list[float] = []
+        revenue_biases: list[float] = []
+        quantity_errors: list[float] = []
+        quantity_pct_errors: list[float] = []
+        quantity_biases: list[float] = []
+
+        for index in range(4, len(aligned)):
+            train = aligned.iloc[index - 4:index]
+            actual = aligned.iloc[index]
+            predicted_revenue = float(train["revenue"].astype(float).mean())
+            actual_revenue = float(actual["revenue"])
+            predicted_quantity = float(train["quantity_sold"].astype(float).mean())
+            actual_quantity = float(actual["quantity_sold"])
+
+            revenue_bias = predicted_revenue - actual_revenue
+            quantity_bias = predicted_quantity - actual_quantity
+            revenue_errors.append(abs(revenue_bias))
+            quantity_errors.append(abs(quantity_bias))
+            revenue_biases.append(revenue_bias)
+            quantity_biases.append(quantity_bias)
+            if actual_revenue > 0:
+                revenue_pct_errors.append(abs(revenue_bias) / actual_revenue)
+            if actual_quantity > 0:
+                quantity_pct_errors.append(abs(quantity_bias) / actual_quantity)
+
+        validation_quarters = len(revenue_errors)
+        rows.append(
+            {
+                "stock_code": product.stock_code,
+                "product_description": product.product_description,
+                "method": "Rolling average of the prior four quarters",
+                "validation_quarters": validation_quarters,
+                "revenue_mae": round(sum(revenue_errors) / max(validation_quarters, 1), 2),
+                "revenue_mape": round(
+                    sum(revenue_pct_errors) / max(len(revenue_pct_errors), 1), 4
+                ),
+                "revenue_bias": round(sum(revenue_biases) / max(validation_quarters, 1), 2),
+                "quantity_mae": round(sum(quantity_errors) / max(validation_quarters, 1), 0),
+                "quantity_mape": round(
+                    sum(quantity_pct_errors) / max(len(quantity_pct_errors), 1), 4
+                ),
+                "quantity_bias": round(
+                    sum(quantity_biases) / max(validation_quarters, 1), 0
+                ),
+                "interpretation": "Backtest error for the same simple baseline used in the next-quarter forecast.",
+            }
+        )
+
+    backtest = pd.DataFrame(rows)
+    backtest.to_csv(OUTPUT_DIR / "product_forecast_backtest.csv", index=False)
+    return backtest
+
+
 def as_money(value: float) -> str:
     return f"GBP {value:,.0f}"
 
@@ -430,6 +524,8 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
     top_revenue = outputs["top_products_by_revenue.csv"]
     slow_products = outputs["slow_moving_product_candidates.csv"]
     product_forecast = outputs["product_next_quarter_forecast.csv"]
+    product_backtest = outputs.get("product_forecast_backtest.csv", pd.DataFrame())
+    country_context = outputs["country_sales_context.csv"]
 
     quality_passed = int((quality["status"] == "Pass").sum())
     quality_total = int(len(quality))
@@ -464,6 +560,29 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
     )
     forecast_total_revenue = float(product_forecast["forecast_revenue"].sum())
     forecast_total_quantity = float(product_forecast["forecast_quantity"].sum())
+    top_country = country_context.iloc[0].to_dict()
+    domestic_revenue = float(
+        country_context[country_context["market_group"] == "Domestic"]["revenue"].sum()
+    )
+    international_revenue = float(
+        country_context[country_context["market_group"] == "International"]["revenue"].sum()
+    )
+    country_total_revenue = domestic_revenue + international_revenue
+    forecast_median_revenue_mape = (
+        float(product_backtest["revenue_mape"].median())
+        if not product_backtest.empty
+        else 0.0
+    )
+    forecast_median_revenue_mae = (
+        float(product_backtest["revenue_mae"].median())
+        if not product_backtest.empty
+        else 0.0
+    )
+    forecast_validation_quarters = (
+        int(product_backtest["validation_quarters"].max())
+        if not product_backtest.empty
+        else 0
+    )
     one_time_customers = int(
         customer_profile[
             (customer_profile["feature"] == "repeat_status")
@@ -521,6 +640,15 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
         "next_product_forecast_quarter": product_forecast["next_quarter"].iloc[0],
         "forecast_top_product_revenue": forecast_total_revenue,
         "forecast_top_product_quantity": forecast_total_quantity,
+        "top_country": top_country["country"],
+        "top_country_revenue": float(top_country["revenue"]),
+        "top_country_revenue_share": float(top_country["revenue_share"]),
+        "domestic_revenue_share": domestic_revenue / max(country_total_revenue, 1),
+        "international_revenue_share": international_revenue / max(country_total_revenue, 1),
+        "countries_represented": int(len(country_context)),
+        "forecast_median_revenue_mape": forecast_median_revenue_mape,
+        "forecast_median_revenue_mae": forecast_median_revenue_mae,
+        "forecast_validation_quarters": forecast_validation_quarters,
     }
 
     (OUTPUT_DIR / "portfolio_metrics.json").write_text(
@@ -553,8 +681,10 @@ Analyse online retail transaction lines to understand product sales structure, i
 - Top quantity product: `{summary["top_quantity_product_description"]}` ({summary["top_quantity_product_code"]}), with {summary["top_quantity_product_units"]:,} units sold.
 - Broadest-reach product: `{summary["broad_demand_product_description"]}` ({summary["broad_demand_product_code"]}), appearing in {summary["broad_demand_product_orders"]:,} orders from {summary["broad_demand_product_customers"]:,} customers.
 - Customer and purchase behaviour: {summary["repeat_customers"]:,} customers ({as_pct(float(summary["repeat_customer_share"]))}) placed at least two orders; the median order value is {as_money(float(summary["median_order_value"]))} and the median order contains {summary["median_units_per_order"]:,.0f} units.
+- Geographic context: {summary["countries_represented"]:,} countries/regions are represented; {summary["top_country"]} contributes {as_pct(float(summary["top_country_revenue_share"]))} of analysed revenue.
 - {summary["slow_moving_candidate_count"]} high-history-revenue merchandise products have not sold for at least 180 days and should be reviewed for clearance, bundling, relisting or delisting.
 - Next-quarter baseline for {summary["forecast_product_count"]} stable high-revenue merchandise products: {summary["forecast_top_product_quantity"]:,.0f} units and {as_money(float(summary["forecast_top_product_revenue"]))} revenue in {summary["next_product_forecast_quarter"]}.
+- Historical backtest for the forecasting baseline uses {summary["forecast_validation_quarters"]} validation quarters per product; median product-level revenue MAPE is {as_pct(float(summary["forecast_median_revenue_mape"]))}.
 
 ## Recommended product actions
 
@@ -568,10 +698,12 @@ Protect stock availability for high-revenue products, use high-volume lower-reve
 - [Top products by quantity](../documentation/figures/top_products_by_quantity.svg) highlights the products driving unit demand.
 - [Slow-moving product candidates](../documentation/figures/slow_moving_products.svg) shows products with historical value but weak recent sales.
 - [Next-quarter product forecast](../documentation/figures/product_forecast_next_quarter.svg) provides a simple planning baseline for stable high-revenue products.
+- [Geographic sales context](../documentation/figures/country_sales_context.svg) shows the country/region concentration of sales.
+- [Forecast backtest summary](../documentation/figures/product_forecast_backtest.svg) shows how the baseline performed when tested against historical quarters.
 
 ## Forecasting note
 
-The product forecast uses an average of the last four quarters and is limited to stable high-revenue merchandise products. It is designed as an interpretable planning baseline, not a production demand-forecasting model.
+The product forecast uses an average of the last four quarters and is limited to stable high-revenue merchandise products. The backtest is included so the baseline can be challenged before it is used for planning. It is designed as an interpretable planning baseline, not a production demand-forecasting model.
 """
     (OUTPUT_DIR / "executive_summary.md").write_text(md, encoding="utf-8")
 
@@ -1043,6 +1175,187 @@ def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object
             "".join(body),
         )
 
+    if "country_sales_context.csv" in outputs:
+        country_df = outputs["country_sales_context.csv"].copy().head(10).iloc[::-1]
+        width, height = 1200, 620
+        left, right, top, bottom = 280, 190, 135, 78
+        plot_width = width - left - right
+        max_value = max(float(country_df["revenue"].max()), 1.0)
+        top_country = outputs["country_sales_context.csv"].iloc[0]
+        body = [
+            chart_text(
+                "Geographic sales context by country/region",
+                55,
+                45,
+                20,
+                weight="500",
+            ),
+            chart_text(
+                "This is a country-level sales view, not a postcode or operational risk map.",
+                55,
+                73,
+                13,
+                fill="#5b6675",
+            ),
+        ]
+
+        def context_card(x: int, y: int, title: str, value: str, note: str, color: str) -> None:
+            body.append(
+                f'<rect x="{x}" y="{y}" width="250" height="92" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/>'
+            )
+            body.append(chart_text(title, x + 18, y + 28, 12, fill="#5b6675"))
+            body.append(chart_text(value, x + 18, y + 58, 22, weight="700", fill=color))
+            body.append(chart_text(note, x + 18, y + 78, 11, fill="#334155"))
+
+        context_card(
+            55,
+            93,
+            "Countries/regions",
+            f"{summary['countries_represented']:,}",
+            "represented in the dataset",
+            "#2563eb",
+        )
+        context_card(
+            325,
+            93,
+            "Top country",
+            str(top_country["country"]),
+            f"{as_pct(float(top_country['revenue_share']))} of revenue",
+            "#0f766e",
+        )
+        context_card(
+            595,
+            93,
+            "Domestic share",
+            as_pct(float(summary["domestic_revenue_share"])),
+            "United Kingdom revenue",
+            "#c2410c",
+        )
+        context_card(
+            865,
+            93,
+            "International share",
+            as_pct(float(summary["international_revenue_share"])),
+            "all other countries",
+            "#7c3aed",
+        )
+
+        body.append(chart_text("Top countries/regions by revenue", left, 226, 15, weight="500"))
+        for index, row in enumerate(country_df.itertuples(index=False)):
+            y = top + 120 + index * 34
+            value = float(row.revenue)
+            bar_width = plot_width * value / max_value
+            body.append(chart_text(shorten_label(row.country, 26), left - 15, y + 18, 12, anchor="end"))
+            body.append(
+                f'<rect x="{left}" y="{y}" width="{plot_width}" height="24" rx="4" fill="#eef2f7"/>'
+            )
+            body.append(
+                f'<rect x="{left}" y="{y}" width="{bar_width:.1f}" height="24" rx="4" fill="#2563eb"/>'
+            )
+            body.append(
+                chart_text(
+                    f"{as_money(value)} | {as_pct(float(row.revenue_share))}",
+                    left + bar_width + 12,
+                    y + 18,
+                    12,
+                )
+            )
+        write_svg(
+            FIGURES_DIR / "country_sales_context.svg",
+            "Country sales context",
+            "Top countries and regions by revenue, with domestic and international revenue split.",
+            width,
+            height,
+            "".join(body),
+        )
+
+    if "product_forecast_backtest.csv" in outputs and not outputs["product_forecast_backtest.csv"].empty:
+        backtest_df = outputs["product_forecast_backtest.csv"].copy()
+        backtest_chart = backtest_df.sort_values("revenue_mape").head(10).iloc[::-1]
+        width, height = 1200, 620
+        left, right, top, bottom = 360, 170, 178, 72
+        plot_width = width - left - right
+        max_value = max(float(backtest_chart["revenue_mape"].max()), 0.01)
+        median_mape = float(backtest_df["revenue_mape"].median())
+        median_mae = float(backtest_df["revenue_mae"].median())
+        validation_quarters = int(backtest_df["validation_quarters"].max())
+        body = [
+            chart_text(
+                "Forecast validation: where the simple baseline is more reliable",
+                55,
+                45,
+                20,
+                weight="500",
+            ),
+            chart_text(
+                "Backtesting compares historical forecasts with the next quarter that actually happened. Lower error means the product is easier to plan with this baseline.",
+                55,
+                73,
+                13,
+                fill="#5b6675",
+            ),
+        ]
+
+        def validation_card(x: int, title: str, value: str, note: str, color: str) -> None:
+            body.append(
+                f'<rect x="{x}" y="102" width="315" height="92" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/>'
+            )
+            body.append(chart_text(title, x + 18, 130, 12, fill="#5b6675"))
+            body.append(chart_text(value, x + 18, 160, 22, weight="700", fill=color))
+            body.append(chart_text(note, x + 18, 180, 11, fill="#334155"))
+
+        validation_card(
+            55,
+            "Validation window",
+            f"{validation_quarters} quarters",
+            "tested per selected product",
+            "#2563eb",
+        )
+        validation_card(
+            387,
+            "Median revenue error",
+            as_pct(median_mape),
+            "MAPE across selected products",
+            "#0f766e",
+        )
+        validation_card(
+            719,
+            "Median GBP error",
+            as_money(median_mae),
+            "MAE per product per quarter",
+            "#c2410c",
+        )
+
+        body.append(chart_text("Lowest-error products in backtest", left, 228, 15, weight="500"))
+        for index, row in enumerate(backtest_chart.itertuples(index=False)):
+            y = top + 80 + index * 34
+            value = float(row.revenue_mape)
+            bar_width = plot_width * value / max_value
+            label = f"{row.stock_code} | {shorten_label(row.product_description, 38)}"
+            body.append(chart_text(label, left - 15, y + 18, 12, anchor="end"))
+            body.append(
+                f'<rect x="{left}" y="{y}" width="{plot_width}" height="24" rx="4" fill="#eef2f7"/>'
+            )
+            body.append(
+                f'<rect x="{left}" y="{y}" width="{bar_width:.1f}" height="24" rx="4" fill="#0f766e"/>'
+            )
+            body.append(
+                chart_text(
+                    f"{as_pct(value)} | {as_money(float(row.revenue_mae))}",
+                    left + bar_width + 12,
+                    y + 18,
+                    12,
+                )
+            )
+        write_svg(
+            FIGURES_DIR / "product_forecast_backtest.svg",
+            "Product forecast backtest",
+            "Validation summary for the four-quarter moving average product forecast baseline.",
+            width,
+            height,
+            "".join(body),
+        )
+
     def line_panel(values: list[float], labels: list[str], x0: int, y0: int, panel_width: int, panel_height: int, title: str, color: str, value_formatter) -> list[str]:
         panel = [chart_text(title, x0, y0, 16, weight="500")]
         plot_top = y0 + 28
@@ -1229,7 +1542,7 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Online Retail Product Sales Dashboard</title>
+  <title>Online Retail BI and Product Planning Dashboard</title>
   <style>
     :root {{
       --ink: #17202a;
@@ -1279,7 +1592,7 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
     }}
     .kpi-grid {{
       display: grid;
-      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
       gap: 14px;
     }}
     .kpi, section, .action-card {{
@@ -1359,8 +1672,8 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
 </head>
 <body>
   <header>
-    <h1>Online Retail Product Sales Dashboard</h1>
-    <p>Visual summary of product range, customer purchase behaviour, sales leaders, slow-moving products and next-quarter planning baseline.</p>
+    <h1>Online Retail BI and Product Planning Dashboard</h1>
+    <p>Visual summary of product range, purchase behaviour, geographic sales context, sales leaders, slow-moving products, forecast baseline and forecast validation.</p>
   </header>
   <main>
     <div class="kpi-grid">
@@ -1368,12 +1681,13 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
       <div class="kpi"><div class="kpi-title">Products Analysed</div><div class="kpi-value">{int(summary["merchandise_products"]):,}</div><div class="kpi-note">merchandise products</div></div>
       <div class="kpi"><div class="kpi-title">Completed Orders</div><div class="kpi-value">{int(summary["distinct_orders"]):,}</div><div class="kpi-note">prepared transactions</div></div>
       <div class="kpi"><div class="kpi-title">Top 500 Products</div><div class="kpi-value">{as_pct(float(summary["top_500_revenue_share"]))}</div><div class="kpi-note">of merchandise revenue</div></div>
+      <div class="kpi"><div class="kpi-title">Countries/Regions</div><div class="kpi-value">{int(summary["countries_represented"]):,}</div><div class="kpi-note">top: {html.escape(str(summary["top_country"]))}</div></div>
     </div>
 
     <div class="story-grid">
       <div class="story-card accent-blue"><h3>Core range</h3><p>{summary["top_500_revenue_share"]:.0%} of merchandise revenue comes from the top 500 products, so planning should start with the stronger sellers.</p></div>
       <div class="story-card accent-green"><h3>Purchase behaviour</h3><p>{summary["repeat_customers"]:,} customers placed at least two orders, and the median order contains {summary["median_units_per_order"]:,.0f} units.</p></div>
-      <div class="story-card accent-purple"><h3>Next quarter</h3><p>The baseline forecasts {summary["forecast_top_product_quantity"]:,.0f} units and {as_money(float(summary["forecast_top_product_revenue"]))} revenue for 20 stable products.</p></div>
+      <div class="story-card accent-purple"><h3>Planning baseline</h3><p>The baseline forecasts {summary["forecast_top_product_quantity"]:,.0f} units and {as_money(float(summary["forecast_top_product_revenue"]))} revenue for 20 stable products.</p></div>
     </div>
 
     <div class="visual-grid">
@@ -1395,6 +1709,17 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
       <section class="chart-panel">
         <h2>Next-Quarter Core Product Forecast</h2>
         {inline_svg("product_forecast_next_quarter.svg")}
+      </section>
+    </div>
+
+    <div class="visual-grid">
+      <section class="chart-panel">
+        <h2>Geographic Sales Context</h2>
+        {inline_svg("country_sales_context.svg")}
+      </section>
+      <section class="chart-panel">
+        <h2>Forecast Backtest</h2>
+        {inline_svg("product_forecast_backtest.svg")}
       </section>
     </div>
 
@@ -1445,6 +1770,7 @@ def main() -> None:
     outputs["purchase_behavior_summary.csv"] = generate_purchase_behavior_summary(outputs)
     outputs.update(generate_product_report_outputs(outputs))
     outputs["product_next_quarter_forecast.csv"] = generate_product_quarterly_forecast(outputs)
+    outputs["product_forecast_backtest.csv"] = generate_product_forecast_backtest(outputs)
     summary = generate_summary(outputs)
     generate_figures(outputs, summary)
     generate_dashboard(outputs, summary)
@@ -1461,6 +1787,7 @@ def main() -> None:
         "product_catalog_summary.csv",
         "slow_moving_product_candidates.csv",
         "product_next_quarter_forecast.csv",
+        "product_forecast_backtest.csv",
     ):
         print(f"- {OUTPUT_DIR / csv_name}")
     print(f"- {OUTPUT_DIR / 'executive_summary.md'}")
@@ -1471,6 +1798,8 @@ def main() -> None:
         "top_products_by_quantity.svg",
         "slow_moving_products.svg",
         "product_forecast_next_quarter.svg",
+        "country_sales_context.svg",
+        "product_forecast_backtest.svg",
         "monthly_kpis.svg",
         "monthly_forecast.svg",
     ):

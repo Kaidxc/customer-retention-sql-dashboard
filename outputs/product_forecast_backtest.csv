@@ -1,0 +1,21 @@
+stock_code,product_description,method,validation_quarters,revenue_mae,revenue_mape,revenue_bias,quantity_mae,quantity_mape,quantity_bias,interpretation
+22423,REGENCY CAKESTAND 3 TIER,Rolling average of the prior four quarters,5,19562.57,0.4732,933.23,1724.0,0.4811,85.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+85123A,WHITE HANGING HEART T-LIGHT HOLDER,Rolling average of the prior four quarters,5,10636.71,0.4112,5024.62,4105.0,0.4382,2043.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+85099B,RED RETROSPOT JUMBO BAG,Rolling average of the prior four quarters,5,3778.43,0.1766,-1352.16,2019.0,0.1749,-381.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+84879,ASSORTED COLOUR BIRD ORNAMENT,Rolling average of the prior four quarters,5,6833.42,0.415,-885.98,4478.0,0.4373,-552.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+47566,PARTY BUNTING,Rolling average of the prior four quarters,5,8093.97,0.5824,-3857.04,1750.0,0.5902,-773.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+22086,PAPER CHAIN KIT 50'S CHRISTMAS,Rolling average of the prior four quarters,5,12191.6,9.2986,-5686.15,4508.0,8.9375,-2066.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+79321,CHILLI LIGHTS,Rolling average of the prior four quarters,5,6415.43,0.5909,-3822.18,1453.0,0.6852,-723.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+22386,JUMBO BAG PINK WITH WHITE SPOTS,Rolling average of the prior four quarters,5,1317.6,0.1438,-861.5,743.0,0.1562,-358.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+21137,BLACK RECORD COVER FRAME,Rolling average of the prior four quarters,5,5795.3,0.5427,-2885.45,1699.0,0.546,-842.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+48138,DOORMAT UNION FLAG,Rolling average of the prior four quarters,5,2601.67,0.5545,2330.75,379.0,0.6293,379.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+85099F,JUMBO BAG STRAWBERRY,Rolling average of the prior four quarters,5,1196.06,0.1846,749.31,723.0,0.2078,514.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+20685,RED SPOTTY COIR DOORMAT,Rolling average of the prior four quarters,5,2339.1,0.4181,1090.26,386.0,0.496,172.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+82484,WOOD BLACK BOARD ANT WHITE FINISH,Rolling average of the prior four quarters,5,5646.32,0.4925,-1221.69,1215.0,0.6475,-145.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+20725,LUNCH BAG RED SPOTTY,Rolling average of the prior four quarters,5,1080.07,0.1742,666.14,702.0,0.1804,465.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+21843,RETRO SPOT CAKE STAND,Rolling average of the prior four quarters,5,2769.22,0.8089,2579.53,283.0,0.8852,243.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+22197,SMALL POPCORN HOLDER,Rolling average of the prior four quarters,5,3619.16,0.3373,-3272.81,4798.0,0.3395,-4345.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+84347,ROTATING SILVER ANGELS T-LIGHT HLDR,Rolling average of the prior four quarters,5,12356.73,143.155,-1326.89,6541.0,196.9676,-489.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+15056N,EDWARDIAN PARASOL NATURAL,Rolling average of the prior four quarters,5,2085.39,0.4857,1324.3,451.0,0.5606,313.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+21621,VINTAGE UNION JACK BUNTING,Rolling average of the prior four quarters,5,3755.31,1.0827,2988.64,460.0,1.1069,349.0,Backtest error for the same simple baseline used in the next-quarter forecast.
+85099C,JUMBO  BAG BAROQUE BLACK WHITE,Rolling average of the prior four quarters,5,1488.1,0.2441,545.09,920.0,0.2822,400.0,Backtest error for the same simple baseline used in the next-quarter forecast.
