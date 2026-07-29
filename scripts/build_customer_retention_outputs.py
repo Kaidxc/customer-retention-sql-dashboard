@@ -537,15 +537,14 @@ def write_executive_summary(summary: dict[str, object]) -> None:
 
 Analyse online retail transaction lines to understand product sales structure, identify the strongest and weakest product opportunities, and create a practical next-quarter planning baseline.
 
-## Dataset
+## Analysis base
 
 - Analysis date: {summary["analysis_date"]}
-- Clean transaction rows: {summary["clean_rows"]:,}
-- Distinct orders: {summary["distinct_orders"]:,}
-- Known customers: {summary["distinct_customers"]:,}
-- Stock codes: {summary["stock_codes"]:,}
-- Merchandise products: {summary["merchandise_products"]:,}
-- Total clean revenue: {as_money(float(summary["total_revenue"]))}
+- Transaction lines analysed: {summary["clean_rows"]:,}
+- Completed orders analysed: {summary["distinct_orders"]:,}
+- Known customers represented: {summary["distinct_customers"]:,}
+- Merchandise products analysed: {summary["merchandise_products"]:,}
+- Revenue analysed: {as_money(float(summary["total_revenue"]))}
 
 ## Key findings
 
@@ -556,7 +555,6 @@ Analyse online retail transaction lines to understand product sales structure, i
 - Customer and purchase behaviour: {summary["repeat_customers"]:,} customers ({as_pct(float(summary["repeat_customer_share"]))}) placed at least two orders; the median order value is {as_money(float(summary["median_order_value"]))} and the median order contains {summary["median_units_per_order"]:,.0f} units.
 - {summary["slow_moving_candidate_count"]} high-history-revenue merchandise products have not sold for at least 180 days and should be reviewed for clearance, bundling, relisting or delisting.
 - Next-quarter baseline for {summary["forecast_product_count"]} stable high-revenue merchandise products: {summary["forecast_top_product_quantity"]:,.0f} units and {as_money(float(summary["forecast_top_product_revenue"]))} revenue in {summary["next_product_forecast_quarter"]}.
-- Customer IDs support demand context, but the dataset does not contain demographic customer features such as age, gender or occupation.
 
 ## Recommended product actions
 

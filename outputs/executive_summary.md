@@ -4,15 +4,14 @@
 
 Analyse online retail transaction lines to understand product sales structure, identify the strongest and weakest product opportunities, and create a practical next-quarter planning baseline.
 
-## Dataset
+## Analysis base
 
 - Analysis date: 2011-12-10
-- Clean transaction rows: 793,609
-- Distinct orders: 36,969
-- Known customers: 5,878
-- Stock codes: 4,631
-- Merchandise products: 4,626
-- Total clean revenue: GBP 17,685,461
+- Transaction lines analysed: 793,609
+- Completed orders analysed: 36,969
+- Known customers represented: 5,878
+- Merchandise products analysed: 4,626
+- Revenue analysed: GBP 17,685,461
 
 ## Key findings
 
@@ -23,7 +22,6 @@ Analyse online retail transaction lines to understand product sales structure, i
 - Customer and purchase behaviour: 4,255 customers (72.4%) placed at least two orders; the median order value is GBP 305 and the median order contains 154 units.
 - 25 high-history-revenue merchandise products have not sold for at least 180 days and should be reviewed for clearance, bundling, relisting or delisting.
 - Next-quarter baseline for 20 stable high-revenue merchandise products: 76,320 units and GBP 205,589 revenue in 2012-Q1.
-- Customer IDs support demand context, but the dataset does not contain demographic customer features such as age, gender or occupation.
 
 ## Recommended product actions
 

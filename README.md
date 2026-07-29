@@ -4,37 +4,23 @@ A UK online retailer has two years of order-line sales history. Each row records
 
 The business question is:
 
-> After cleaning the transaction data, what products does the business sell, what do customer purchases look like, which products sell best, and what should the business plan for next quarter?
+> Using the prepared transaction data, what products does the business sell, what do customer purchases look like, which products sell best, and what should the business plan for next quarter?
 
-This report focuses on products, sales and demand. The dataset has customer IDs, but it does not contain demographic customer attributes such as age, gender, occupation, membership tier or marketing channel. Customer IDs are therefore used only to describe purchase behaviour and product reach.
+## Analysis Base
 
-## Data Used
+The analysis below is based on the prepared UCI Online Retail II transaction dataset.
 
-The project uses the UCI Online Retail II dataset, cleaned into transaction-line records for analysis.
-
-| Dataset feature | Value |
+| Analysis base | Value |
 |---|---:|
-| Transaction period | 2009-12-01 to 2011-12-09 |
-| Clean transaction lines | 793,609 |
-| Distinct orders | 36,969 |
-| Known customers | 5,878 |
-| Stock codes | 4,631 |
-| Merchandise products | 4,626 |
-| Countries/regions | 41 |
-| Clean revenue | GBP 17.7m |
+| Sales period analysed | 2009-12-01 to 2011-12-09 |
+| Transaction lines analysed | 793,609 |
+| Completed orders analysed | 36,969 |
+| Known customers represented | 5,878 |
+| Merchandise products analysed | 4,626 |
+| Countries/regions represented | 41 |
+| Revenue analysed | GBP 17.7m |
 
-The raw dataset is an order-line table. One invoice can appear across many rows when a customer buys multiple products in the same order.
-
-| Layer | What it represents | Example fields |
-|---|---|---|
-| Transaction line | One product line inside an invoice | invoice, stock code, quantity, unit price, line value |
-| Order | One completed customer purchase | invoice, customer ID, order date, order value |
-| Product | One stock item aggregated across sales | units sold, revenue, orders, customers, active months |
-| Planning item | A product selected for action | top seller, slow-moving candidate, forecast item |
-
-Cleaning removed cancelled or unusable records, missing customer IDs, non-positive quantities or prices, duplicate transaction lines and rows that could not support sales analysis. Source and cleaning notes are in [`data/README.md`](data/README.md).
-
-## 1. Product Types After Cleaning
+## 1. Product Range Analysed
 
 The dataset does not contain a formal product category field. Product variety is therefore represented by `stock_code`, product description, sales activity and whether a stock code is a sellable merchandise item or a service/admin line.
 
@@ -57,7 +43,7 @@ Key interpretation:
 
 ## 2. Customer and Purchase Behaviour
 
-The data does not describe who the customers are demographically. It does show how customers purchase.
+Customer analysis here is based on observed purchases: repeat status, order frequency, order value and basket size.
 
 | Behaviour metric | Finding |
 |---|---:|
@@ -178,7 +164,7 @@ The business should manage products in four groups:
 
 ## Data Quality Checks
 
-Before product analysis, the cleaned table is checked across six dimensions.
+Before product analysis, the analytical table is checked across six dimensions.
 
 | Dimension | Check | Result |
 |---|---|---|
@@ -210,7 +196,7 @@ Main outputs:
 
 ```mermaid
 flowchart LR
-    A[Clean transaction lines] --> B[Data quality checks]
+    A[Prepared transaction lines] --> B[Data quality checks]
     B --> C[Product catalogue structure]
     B --> D[Customer and purchase behaviour]
     C --> E[Top 10 by units]
@@ -227,7 +213,7 @@ flowchart LR
 
 ## Reproduce the Analysis
 
-The build expects the cleaned transaction file from the companion cleaning project by default:
+The build expects the prepared transaction file from the companion data project by default:
 
 ```text
 ../SQL_Study_package/day1_customer_retention_learning_pack/outputs/clean_transactions.csv
