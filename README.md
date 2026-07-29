@@ -22,13 +22,13 @@ The analysis below is based on the prepared UCI Online Retail II transaction dat
 
 ## 1. Product Range Analysed
 
-The first question is whether this is a small stable product range or a broad catalogue with a long tail. The answer affects how the business should manage stock, promotions and forecasting.
+The first question is whether this is a small stable product range or a broad catalogue with many low-selling items. The answer affects how the business should manage stock, promotions and forecasting.
 
 | Management question | Evidence | Meaning |
 |---|---:|---|
 | How broad is the range? | 4,626 merchandise products | Product management needs prioritisation, not equal attention for every item. |
 | Is there a stable core? | 1,464 products sold in 19-25 months | These products are better candidates for stock planning and forecasting. |
-| Is there a long tail? | 1,004 products had no sale for 365+ days | These products need lifecycle review before being kept in active planning. |
+| Are many products selling rarely? | 1,004 products had no sale for 365+ days | These products need lifecycle review before being kept in active planning. |
 | Where is revenue concentrated? | Top 500 products generate 64.0% of merchandise revenue | Management focus should start with the products that drive most revenue. |
 
 ![Product catalogue overview](documentation/figures/product_catalog_overview.svg)
@@ -37,7 +37,7 @@ Key interpretation:
 
 - The retailer has a broad catalogue, not a small fixed product set.
 - A stable core range can be planned product by product.
-- The long tail should be managed through review rules, lifecycle decisions and category-level assumptions.
+- Low-selling and inactive products should be managed through review rules, lifecycle decisions and category-level assumptions.
 
 ## 2. Customer and Purchase Behaviour
 
@@ -158,7 +158,7 @@ The business should manage products in four groups:
 1. **Protect stock for high-revenue, broad-reach products.** These products drive income and appear across many orders/customers.
 2. **Use high-unit lower-revenue products for baskets and bundles.** They can increase order size even when they are not premium revenue drivers.
 3. **Review slow-moving products before discounting or delisting.** The transaction data shows lack of recent sales, but not whether the cause is stockout, discontinuation or weak demand.
-4. **Forecast stable products individually and manage the long tail by rules.** The full catalogue is too sparse for reliable product-by-product forecasting.
+4. **Forecast stable products individually and manage low-selling items by rules.** The full catalogue is too sparse for reliable product-by-product forecasting.
 
 ## Data Quality Checks
 
@@ -232,4 +232,4 @@ The script generates SQL outputs, product CSVs, the HTML dashboard, SVG figures 
 - The dataset does not include product category, inventory, stockout, cost or margin fields.
 - Revenue is used instead of profit because product cost and margin are not available.
 - Products with weak recent sales may be discontinued, seasonal or out of stock; transaction history alone cannot separate these causes.
-- Forecasting is limited to stable high-revenue products; sparse long-tail products should be managed by category or lifecycle rules.
+- Forecasting is limited to stable high-revenue products; sparse low-selling products should be managed by category or lifecycle rules.

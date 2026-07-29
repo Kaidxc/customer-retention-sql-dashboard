@@ -15,7 +15,7 @@ Analyse online retail transaction lines to understand product sales structure, i
 
 ## Key findings
 
-- Product sales follow a long-tail pattern: the top 10 merchandise products contribute 8.1% of merchandise revenue, while the top 500 contribute 64.0%.
+- Product sales are uneven: the top 10 merchandise products contribute 8.1% of merchandise revenue, while the top 500 contribute 64.0%.
 - Top revenue product: `REGENCY CAKESTAND 3 TIER` (22423), generating GBP 285,992.
 - Top quantity product: `WORLD WAR 2 GLIDERS ASSTD DESIGNS` (84077), with 108,929 units sold.
 - Broadest-reach product: `WHITE HANGING HEART T-LIGHT HOLDER` (85123A), appearing in 4,895 orders from 1,490 customers.
@@ -29,7 +29,7 @@ Protect stock availability for high-revenue products, use high-volume lower-reve
 
 ## Evidence for decision-makers
 
-- [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows the stable core range, long-tail review need and revenue concentration.
+- [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows the stable core range, low-selling product review need and revenue concentration.
 - [Customer and purchase behaviour](../documentation/figures/customer_purchase_overview.svg) shows repeat status, customer order frequency, order value and units per order.
 - [Top products by revenue](../documentation/figures/top_products_by_revenue.svg) highlights the products driving income.
 - [Top products by quantity](../documentation/figures/top_products_by_quantity.svg) highlights the products driving unit demand.

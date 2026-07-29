@@ -16,6 +16,6 @@ Online Retail Product Sales & Demand Analysis
 
 - Transformed order-line retail data into product-level decision tables using SQL, Python and pandas.
 - Analysed product performance and purchase behaviour across revenue, quantity, order reach, customer reach, basket size and active selling months to separate revenue drivers from volume drivers.
-- Identified long-tail catalogue structure and slow-moving products with meaningful historical revenue but weak recent sales.
+- Identified a broad product range with many low-selling items and slow-moving products with meaningful historical revenue but weak recent sales.
 - Produced dashboard-ready CSVs, SVG charts, a generated HTML dashboard and a narrative GitHub README written as a business report.
 - Framed practical product actions for stock protection, bundling, slow-moving review and demand planning, with a proposed evaluation approach.

@@ -10,7 +10,7 @@ This is not a production demand-forecasting system. It is an interpretable basel
 
 ## Why not forecast every product?
 
-The catalogue is long-tailed. Many products sell intermittently, some appear to be seasonal, and some may be discontinued. Forecasting every stock code individually would create false precision.
+The catalogue is broad, and many products sell only occasionally. Some appear to be seasonal, and some may be discontinued. Forecasting every stock code individually would create false precision.
 
 The project therefore forecasts only products that are:
 

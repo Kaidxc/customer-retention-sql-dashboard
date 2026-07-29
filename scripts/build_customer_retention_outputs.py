@@ -548,7 +548,7 @@ Analyse online retail transaction lines to understand product sales structure, i
 
 ## Key findings
 
-- Product sales follow a long-tail pattern: the top 10 merchandise products contribute {as_pct(float(summary["top_10_revenue_share"]))} of merchandise revenue, while the top 500 contribute {as_pct(float(summary["top_500_revenue_share"]))}.
+- Product sales are uneven: the top 10 merchandise products contribute {as_pct(float(summary["top_10_revenue_share"]))} of merchandise revenue, while the top 500 contribute {as_pct(float(summary["top_500_revenue_share"]))}.
 - Top revenue product: `{summary["top_revenue_product_description"]}` ({summary["top_revenue_product_code"]}), generating {as_money(float(summary["top_revenue_product_revenue"]))}.
 - Top quantity product: `{summary["top_quantity_product_description"]}` ({summary["top_quantity_product_code"]}), with {summary["top_quantity_product_units"]:,} units sold.
 - Broadest-reach product: `{summary["broad_demand_product_description"]}` ({summary["broad_demand_product_code"]}), appearing in {summary["broad_demand_product_orders"]:,} orders from {summary["broad_demand_product_customers"]:,} customers.
@@ -562,7 +562,7 @@ Protect stock availability for high-revenue products, use high-volume lower-reve
 
 ## Evidence for decision-makers
 
-- [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows the stable core range, long-tail review need and revenue concentration.
+- [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows the stable core range, low-selling product review need and revenue concentration.
 - [Customer and purchase behaviour](../documentation/figures/customer_purchase_overview.svg) shows repeat status, customer order frequency, order value and units per order.
 - [Top products by revenue](../documentation/figures/top_products_by_revenue.svg) highlights the products driving income.
 - [Top products by quantity](../documentation/figures/top_products_by_quantity.svg) highlights the products driving unit demand.
@@ -610,14 +610,14 @@ def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object
         width, height = 1200, 680
         body = [
             chart_text(
-                "Product range snapshot: broad catalogue, clear core range and long tail",
+                "Product range snapshot: many products, smaller core of stronger sellers",
                 55,
                 48,
                 20,
                 weight="500",
             ),
             chart_text(
-                "Management takeaway: plan the stable core carefully, and manage the long tail with review rules.",
+                "Management takeaway: plan the stable core carefully, and review low-selling items with clear rules.",
                 55,
                 76,
                 13,
@@ -692,7 +692,7 @@ def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object
             865,
             115,
             250,
-            "Long-tail review",
+            "Low-selling review",
             f"{dormant_products:,}",
             "products had no sale",
             "for 365+ days",
@@ -757,8 +757,8 @@ def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object
             ),
             (
                 "Manage by rules",
-                "The long tail should use category or lifecycle",
-                "rules rather than manual product planning.",
+                "Low-selling items should use category or",
+                "lifecycle rules rather than manual planning.",
             ),
         ]
         for index, (title, line_1, line_2) in enumerate(action_items):

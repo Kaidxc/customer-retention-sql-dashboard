@@ -18,7 +18,7 @@ This project is written as a product sales and demand analysis report for non-te
 |---|---|
 | SQL transformation | Product performance, order purchase summary, revenue concentration, quarterly sales, monthly KPIs and data quality checks. |
 | KPI design | Units sold, revenue, order count, customer reach, active months, average selling price, order value, units per order and days since last sale. |
-| Product analysis | Top products by revenue, Top products by quantity, catalogue long-tail structure and slow-moving candidates. |
+| Product analysis | Top products by revenue, Top products by quantity, core vs low-selling product range and slow-moving candidates. |
 | Purchase behaviour analysis | Customer repeat status, orders per customer, order value distribution and basket-size distribution. |
 | Forecasting | Last-four-quarter average baseline for stable high-revenue merchandise products. |
 | Data quality | Checks mapped to accuracy, validity, timeliness, completeness, consistency and uniqueness. |
