@@ -22,24 +22,22 @@ The analysis below is based on the prepared UCI Online Retail II transaction dat
 
 ## 1. Product Range Analysed
 
-The dataset does not contain a formal product category field. Product variety is therefore represented by `stock_code`, product description, sales activity and whether a stock code is a sellable merchandise item or a service/admin line.
+The first question is whether this is a small stable product range or a broad catalogue with a long tail. The answer affects how the business should manage stock, promotions and forecasting.
 
-| Product structure | Finding |
-|---|---:|
-| Merchandise products | 4,626 |
-| Service/admin stock lines | 5 |
-| Distinct product descriptions in product outputs | 4,589 |
-| Products active in 19-25 months | 1,464 |
-| Products with GBP 50k+ historical revenue | 28 |
-| Products with no sale for 365+ days | 1,004 |
+| Management question | Evidence | Meaning |
+|---|---:|---|
+| How broad is the range? | 4,626 merchandise products | Product management needs prioritisation, not equal attention for every item. |
+| Is there a stable core? | 1,464 products sold in 19-25 months | These products are better candidates for stock planning and forecasting. |
+| Is there a long tail? | 1,004 products had no sale for 365+ days | These products need lifecycle review before being kept in active planning. |
+| Where is revenue concentrated? | Top 500 products generate 64.0% of merchandise revenue | Management focus should start with the products that drive most revenue. |
 
 ![Product catalogue overview](documentation/figures/product_catalog_overview.svg)
 
 Key interpretation:
 
 - The retailer has a broad catalogue, not a small fixed product set.
-- Revenue is long-tailed: the top 10 merchandise products account for 8.1% of merchandise revenue, while the top 500 account for 64.0%.
-- Because the catalogue is long-tailed, the same method should not be used for every product. Core products can be forecast individually; sparse or old products need lifecycle review.
+- A stable core range can be planned product by product.
+- The long tail should be managed through review rules, lifecycle decisions and category-level assumptions.
 
 ## 2. Customer and Purchase Behaviour
 

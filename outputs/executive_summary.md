@@ -29,7 +29,7 @@ Protect stock availability for high-revenue products, use high-volume lower-reve
 
 ## Evidence for decision-makers
 
-- [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows catalogue breadth, active-month distribution and revenue concentration.
+- [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows the stable core range, long-tail review need and revenue concentration.
 - [Customer and purchase behaviour](../documentation/figures/customer_purchase_overview.svg) shows repeat status, customer order frequency, order value and units per order.
 - [Top products by revenue](../documentation/figures/top_products_by_revenue.svg) highlights the products driving income.
 - [Top products by quantity](../documentation/figures/top_products_by_quantity.svg) highlights the products driving unit demand.

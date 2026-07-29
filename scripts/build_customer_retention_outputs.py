@@ -562,7 +562,7 @@ Protect stock availability for high-revenue products, use high-volume lower-reve
 
 ## Evidence for decision-makers
 
-- [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows catalogue breadth, active-month distribution and revenue concentration.
+- [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows the stable core range, long-tail review need and revenue concentration.
 - [Customer and purchase behaviour](../documentation/figures/customer_purchase_overview.svg) shows repeat status, customer order frequency, order value and units per order.
 - [Top products by revenue](../documentation/figures/top_products_by_revenue.svg) highlights the products driving income.
 - [Top products by quantity](../documentation/figures/top_products_by_quantity.svg) highlights the products driving unit demand.
@@ -607,17 +607,17 @@ def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object
     product_catalog = outputs.get("product_catalog_summary.csv")
     concentration = outputs.get("product_revenue_concentration.csv")
     if product_catalog is not None and concentration is not None:
-        width, height = 1200, 760
+        width, height = 1200, 680
         body = [
             chart_text(
-                "Product catalogue after cleaning: broad assortment with a long revenue tail",
+                "Product range snapshot: broad catalogue, clear core range and long tail",
                 55,
                 48,
                 20,
                 weight="500",
             ),
             chart_text(
-                f"{summary['merchandise_products']:,} merchandise products | Top 100 revenue share: {as_pct(float(summary['top_100_revenue_share']))} | Top 500 revenue share: {as_pct(float(summary['top_500_revenue_share']))}",
+                "Management takeaway: plan the stable core carefully, and manage the long tail with review rules.",
                 55,
                 76,
                 13,
@@ -625,86 +625,152 @@ def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object
             ),
         ]
 
-        def bucket_panel(
-            subset: pd.DataFrame,
+        def catalog_count(feature: str, bucket: str) -> int:
+            row = product_catalog[
+                (product_catalog["feature"] == feature)
+                & (product_catalog["bucket"] == bucket)
+            ]
+            return int(row["products"].iloc[0]) if not row.empty else 0
+
+        active_core = catalog_count("active_months", "19-25")
+        dormant_products = catalog_count("days_since_last_sale", "365+ days")
+        high_revenue_products = catalog_count("total_revenue", "GBP50k+")
+        top_100_share = float(summary["top_100_revenue_share"])
+        top_500_share = float(summary["top_500_revenue_share"])
+        next_400_share = max(top_500_share - top_100_share, 0.0)
+        remaining_share = max(1.0 - top_500_share, 0.0)
+
+        def metric_card(
+            x: int,
+            y: int,
+            width_: int,
             title: str,
-            x0: int,
-            y0: int,
-            panel_width: int,
-            panel_height: int,
+            value: str,
+            line_1: str,
+            line_2: str,
             color: str,
         ) -> None:
-            max_products = max(int(subset["products"].max()), 1)
-            label_width = 116
-            value_width = 112
-            bar_x = x0 + label_width
-            bar_width = panel_width - label_width - value_width - 18
-            row_height = 24
-            row_gap = 10
             body.append(
-                f'<rect x="{x0 - 18}" y="{y0 - 35}" width="{panel_width + 26}" height="{panel_height}" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/>'
+                f'<rect x="{x}" y="{y}" width="{width_}" height="145" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/>'
             )
-            body.append(chart_text(title, x0, y0 - 10, 15, weight="500"))
-            for index, row in enumerate(subset.itertuples(index=False)):
-                y = y0 + 25 + index * (row_height + row_gap)
-                products = int(row.products)
-                share = float(row.product_share)
-                bar_len = bar_width * products / max_products
-                body.append(chart_text(row.bucket, x0, y + 17, 12, fill="#334155"))
-                body.append(
-                    f'<rect x="{bar_x}" y="{y}" width="{bar_width}" height="{row_height}" rx="4" fill="#eef2f7"/>'
-                )
-                body.append(
-                    f'<rect x="{bar_x}" y="{y}" width="{bar_len:.1f}" height="{row_height}" rx="4" fill="{color}"/>'
-                )
+            body.append(chart_text(title, x + 22, y + 30, 13, fill="#5b6675"))
+            body.append(chart_text(value, x + 22, y + 78, 32, weight="700", fill=color))
+            body.append(chart_text(line_1, x + 22, y + 112, 12, fill="#334155"))
+            body.append(chart_text(line_2, x + 22, y + 132, 12, fill="#334155"))
+
+        metric_card(
+            55,
+            115,
+            250,
+            "Total range",
+            f"{summary['merchandise_products']:,}",
+            "merchandise products",
+            "included in analysis",
+            "#2563eb",
+        )
+        metric_card(
+            325,
+            115,
+            250,
+            "Stable core",
+            f"{active_core:,}",
+            "products sold in",
+            "19-25 months",
+            "#0f766e",
+        )
+        metric_card(
+            595,
+            115,
+            250,
+            "High-value items",
+            f"{high_revenue_products:,}",
+            "products generated",
+            "GBP 50k+ revenue",
+            "#c2410c",
+        )
+        metric_card(
+            865,
+            115,
+            250,
+            "Long-tail review",
+            f"{dormant_products:,}",
+            "products had no sale",
+            "for 365+ days",
+            "#7c3aed",
+        )
+
+        x0, y0, bar_width, bar_height = 85, 330, 1030, 46
+        body.append(
+            f'<rect x="55" y="290" width="1090" height="145" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/>'
+        )
+        body.append(chart_text("Revenue concentration", 85, 318, 15, weight="500"))
+        body.append(
+            f'<rect x="{x0}" y="{y0}" width="{bar_width}" height="{bar_height}" rx="5" fill="#eef2f7"/>'
+        )
+        segments = [
+            ("Top 100 products", top_100_share, "#2563eb"),
+            ("Products 101-500", next_400_share, "#0f766e"),
+            ("Remaining products", remaining_share, "#94a3b8"),
+        ]
+        current_x = x0
+        for label, share, color in segments:
+            segment_width = bar_width * share
+            body.append(
+                f'<rect x="{current_x:.1f}" y="{y0}" width="{segment_width:.1f}" height="{bar_height}" rx="5" fill="{color}"/>'
+            )
+            if segment_width > 135:
                 body.append(
                     chart_text(
-                        f"{products:,} ({share:.0%})",
-                        bar_x + bar_width + 12,
-                        y + 17,
-                        12,
-                        fill="#334155",
+                        f"{share:.0%}",
+                        current_x + segment_width / 2,
+                        y0 + 30,
+                        13,
+                        anchor="middle",
+                        weight="500",
+                        fill="#ffffff" if color != "#94a3b8" else "#17202a",
                     )
                 )
+            current_x += segment_width
+        legend_y = 405
+        legend_x = 85
+        for label, share, color in segments:
+            body.append(
+                f'<rect x="{legend_x}" y="{legend_y - 12}" width="13" height="13" rx="2" fill="{color}"/>'
+            )
+            body.append(chart_text(f"{label}: {as_pct(share)}", legend_x + 20, legend_y, 12))
+            legend_x += 305
 
-        active_subset = product_catalog[product_catalog["feature"] == "active_months"]
-        revenue_subset = product_catalog[product_catalog["feature"] == "total_revenue"]
-        bucket_panel(active_subset, "Active months per product", 70, 145, 505, 300, "#2563eb")
-        bucket_panel(revenue_subset, "Historical revenue per product", 665, 145, 505, 340, "#c2410c")
-
-        concentration_subset = concentration[
-            concentration["product_group"].isin(["Top 10", "Top 50", "Top 100", "Top 500"])
-        ].copy()
-        x0, y0, panel_width, panel_height = 70, 535, 1100, 170
         body.append(
-            f'<rect x="{x0 - 18}" y="{y0 - 35}" width="{panel_width + 26}" height="{panel_height}" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/>'
+            f'<rect x="55" y="475" width="1090" height="145" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/>'
         )
-        body.append(chart_text("Revenue concentration", x0, y0 - 10, 15, weight="500"))
-        max_share = max(float(concentration_subset["revenue_share"].max()), 1.0)
-        bar_width = 820
-        for index, row in enumerate(concentration_subset.itertuples(index=False)):
-            y = y0 + 24 + index * 28
-            share = float(row.revenue_share)
-            body.append(chart_text(row.product_group, x0, y + 17, 12, fill="#334155"))
-            body.append(
-                f'<rect x="{x0 + 120}" y="{y}" width="{bar_width}" height="22" rx="4" fill="#eef2f7"/>'
-            )
-            body.append(
-                f'<rect x="{x0 + 120}" y="{y}" width="{bar_width * share / max_share:.1f}" height="22" rx="4" fill="#0f766e"/>'
-            )
-            body.append(
-                chart_text(
-                    f"{as_pct(share)} | {int(row.products_in_group):,} products",
-                    x0 + 955,
-                    y + 16,
-                    12,
-                    fill="#334155",
-                )
-            )
+        body.append(chart_text("How to use this insight", 85, 505, 15, weight="500"))
+        action_items = [
+            (
+                "Plan individually",
+                "Stable, high-revenue products are suitable",
+                "for stock and forecast review.",
+            ),
+            (
+                "Review lifecycle",
+                "Products with no recent sale need checks for",
+                "discontinuation, seasonality or stockout.",
+            ),
+            (
+                "Manage by rules",
+                "The long tail should use category or lifecycle",
+                "rules rather than manual product planning.",
+            ),
+        ]
+        for index, (title, line_1, line_2) in enumerate(action_items):
+            x = 85 + index * 345
+            body.append(chart_text(title, x, 545, 14, weight="500"))
+            body.append(chart_text(line_1, x, 575, 12, fill="#334155"))
+            body.append(chart_text(line_2, x, 595, 12, fill="#334155"))
+
         write_svg(
             FIGURES_DIR / "product_catalog_overview.svg",
             "Product catalogue overview",
-            "Panels show merchandise product active-month distribution, historical revenue buckets and revenue concentration.",
+            "Business snapshot showing total product range, stable core products, high-value products, dormant products and revenue concentration.",
             width,
             height,
             "".join(body),
