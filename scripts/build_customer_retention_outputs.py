@@ -148,6 +148,80 @@ def generate_monthly_forecast(outputs: dict[str, pd.DataFrame]) -> pd.DataFrame:
     return forecast
 
 
+def generate_customer_profile_summary(outputs: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    customer_metrics = outputs["customer_metrics.csv"].copy()
+    total_customers = len(customer_metrics)
+    rows: list[dict[str, object]] = []
+
+    def add_bucket_summary(
+        feature: str,
+        values: pd.Series,
+        bins: list[float],
+        labels: list[str],
+        description: str,
+    ) -> None:
+        bucketed = pd.cut(values, bins=bins, labels=labels, include_lowest=True)
+        counts = bucketed.value_counts(sort=False)
+        for label, count in counts.items():
+            rows.append(
+                {
+                    "feature": feature,
+                    "bucket": str(label),
+                    "customers": int(count),
+                    "customer_share": round(count / total_customers, 4),
+                    "description": description,
+                }
+            )
+
+    repeat_counts = customer_metrics["repeat_customer_flag"].map(
+        {0: "One-time customer", 1: "Repeat customer"}
+    ).value_counts(sort=False)
+    for label in ("One-time customer", "Repeat customer"):
+        count = int(repeat_counts.get(label, 0))
+        rows.append(
+            {
+                "feature": "repeat_status",
+                "bucket": label,
+                "customers": count,
+                "customer_share": round(count / total_customers, 4),
+                "description": "Whether a customer placed one order or at least two orders.",
+            }
+        )
+
+    add_bucket_summary(
+        "total_orders",
+        customer_metrics["total_orders"],
+        [0, 1, 2, 5, 10, 20, float("inf")],
+        ["1", "2", "3-5", "6-10", "11-20", "21+"],
+        "Distinct completed orders per customer.",
+    )
+    add_bucket_summary(
+        "total_revenue",
+        customer_metrics["total_revenue"],
+        [-0.01, 100, 500, 1000, 5000, float("inf")],
+        ["<=GBP100", "GBP100-500", "GBP500-1k", "GBP1k-5k", "GBP5k+"],
+        "Historical revenue per customer.",
+    )
+    add_bucket_summary(
+        "days_since_last_purchase",
+        customer_metrics["days_since_last_purchase"],
+        [-1, 30, 90, 180, 365, float("inf")],
+        ["0-30 days", "31-90 days", "91-180 days", "181-365 days", "365+ days"],
+        "Inactivity measured from the analysis date to the customer's last purchase.",
+    )
+    add_bucket_summary(
+        "average_order_value",
+        customer_metrics["average_order_value"],
+        [-0.01, 25, 50, 100, 250, float("inf")],
+        ["<=GBP25", "GBP25-50", "GBP50-100", "GBP100-250", "GBP250+"],
+        "Average order value per customer.",
+    )
+
+    profile = pd.DataFrame(rows)
+    profile.to_csv(OUTPUT_DIR / "customer_profile_summary.csv", index=False)
+    return profile
+
+
 def as_money(value: float) -> str:
     return f"GBP {value:,.0f}"
 
@@ -165,6 +239,7 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
     monthly = outputs["monthly_kpis.csv"]
     quality = outputs["data_quality_checks.csv"]
     forecast = outputs["monthly_forecast.csv"]
+    customer_profile = outputs["customer_profile_summary.csv"]
 
     top_segment = rfm_summary.sort_values("segment_revenue", ascending=False).iloc[0].to_dict()
     at_risk = rfm_summary[rfm_summary["rfm_segment"] == "At Risk High Value"]
@@ -188,6 +263,18 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
         (forecast["metric"] == "monthly_repeat_purchase_rate")
         & (forecast["forecast_month"] > latest_month["transaction_month"])
     ].iloc[0]
+    one_time_customers = int(
+        customer_profile[
+            (customer_profile["feature"] == "repeat_status")
+            & (customer_profile["bucket"] == "One-time customer")
+        ]["customers"].iloc[0]
+    )
+    repeat_customers = int(
+        customer_profile[
+            (customer_profile["feature"] == "repeat_status")
+            & (customer_profile["bucket"] == "Repeat customer")
+        ]["customers"].iloc[0]
+    )
 
     summary = {
         "analysis_date": overview["analysis_date"],
@@ -213,6 +300,13 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
             next_repeat_forecast["forecast_value"]
         ),
         "forecast_method": next_revenue_forecast["method"],
+        "one_time_customers": one_time_customers,
+        "repeat_customers": repeat_customers,
+        "median_customer_orders": float(customer_metrics["total_orders"].median()),
+        "median_customer_revenue": float(customer_metrics["total_revenue"].median()),
+        "median_days_since_last_purchase": float(
+            customer_metrics["days_since_last_purchase"].median()
+        ),
     }
 
     (OUTPUT_DIR / "portfolio_metrics.json").write_text(
@@ -240,6 +334,8 @@ Identify which existing customers should be prioritised for a retention campaign
 ## Key findings
 
 - Repeat purchase rate across known customers is {as_pct(float(summary["repeat_purchase_rate"]))}.
+- Customer base: {summary["repeat_customers"]:,} repeat customers and {summary["one_time_customers"]:,} one-time customers.
+- Median customer profile: {summary["median_customer_orders"]:.0f} orders, {as_money(float(summary["median_customer_revenue"]))} revenue and {summary["median_days_since_last_purchase"]:.0f} days since last purchase.
 - The highest revenue RFM segment is `{summary["top_segment"]}`, contributing {as_money(float(summary["top_segment_revenue"]))}.
 - `{summary["at_risk_high_value_customers"]}` customers are classified as `At Risk High Value`, representing {as_money(float(summary["at_risk_high_value_revenue"]))} in historical revenue.
 - The campaign target list contains `{summary["campaign_target_count"]}` customers prioritised by historical value, order frequency, and inactivity.
@@ -253,6 +349,7 @@ Prioritise the `At Risk High Value` segment first. These customers have meaningf
 
 ## Evidence for decision-makers
 
+- [Customer profile overview](../documentation/figures/customer_profile_overview.svg) shows the cleaned customer base by repeat status, order frequency, revenue and inactivity.
 - [Segment revenue view](../documentation/figures/segment_revenue.svg) shows where historical value is concentrated and highlights the retention opportunity.
 - [Monthly KPI trend](../documentation/figures/monthly_kpis.svg) shows how revenue and monthly repeat purchasing change over time.
 - [Monthly forecast baseline](../documentation/figures/monthly_forecast.svg) shows a transparent short-term revenue planning baseline.
@@ -291,6 +388,85 @@ def chart_text(value: object, x: float, y: float, size: int = 14, anchor: str = 
 def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object]) -> None:
     """Create static, dependency-light SVG charts from the same SQL outputs as the dashboard."""
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Customer profile overview chart.
+    profile = outputs.get("customer_profile_summary.csv")
+    if profile is not None and not profile.empty:
+        width, height = 1200, 760
+        body = [
+            chart_text(
+                "Customer profile after cleaning: behaviour is uneven across value, frequency and recency",
+                55,
+                48,
+                20,
+                weight="500",
+            ),
+            chart_text(
+                f"{summary['distinct_customers']:,} known customers | median customer: {summary['median_customer_orders']:.0f} orders, {as_money(float(summary['median_customer_revenue']))}, {summary['median_days_since_last_purchase']:.0f} days inactive",
+                55,
+                76,
+                13,
+                fill="#5b6675",
+            ),
+        ]
+
+        def profile_panel(
+            feature: str,
+            title: str,
+            x0: int,
+            y0: int,
+            panel_width: int,
+            panel_height: int,
+            color: str,
+        ) -> None:
+            subset = profile[profile["feature"] == feature].copy()
+            max_customers = max(int(subset["customers"].max()), 1)
+            label_width = 116
+            value_width = 112
+            bar_x = x0 + label_width
+            bar_width = panel_width - label_width - value_width - 18
+            row_height = 26
+            row_gap = 12
+
+            body.append(
+                f'<rect x="{x0 - 18}" y="{y0 - 35}" width="{panel_width + 26}" height="{panel_height}" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/>'
+            )
+            body.append(chart_text(title, x0, y0 - 10, 15, weight="500"))
+            for index, row in enumerate(subset.itertuples(index=False)):
+                y = y0 + 25 + index * (row_height + row_gap)
+                customers = int(row.customers)
+                share = float(row.customer_share)
+                bar_len = bar_width * customers / max_customers
+                body.append(chart_text(row.bucket, x0, y + 18, 12, fill="#334155"))
+                body.append(
+                    f'<rect x="{bar_x}" y="{y}" width="{bar_width}" height="{row_height}" rx="4" fill="#eef2f7"/>'
+                )
+                body.append(
+                    f'<rect x="{bar_x}" y="{y}" width="{bar_len:.1f}" height="{row_height}" rx="4" fill="{color}"/>'
+                )
+                body.append(
+                    chart_text(
+                        f"{customers:,} ({share:.0%})",
+                        bar_x + bar_width + 12,
+                        y + 18,
+                        12,
+                        fill="#334155",
+                    )
+                )
+
+        profile_panel("repeat_status", "Repeat status", 70, 140, 505, 190, "#2563eb")
+        profile_panel("total_orders", "Orders per customer", 665, 140, 505, 340, "#0f766e")
+        profile_panel("total_revenue", "Historical revenue per customer", 70, 440, 505, 270, "#c2410c")
+        profile_panel("days_since_last_purchase", "Days since last purchase", 665, 500, 505, 210, "#7c3aed")
+
+        write_svg(
+            FIGURES_DIR / "customer_profile_overview.svg",
+            "Customer profile after cleaning",
+            "Four panel chart showing repeat status, order frequency, customer revenue and inactivity distributions.",
+            width,
+            height,
+            "".join(body),
+        )
 
     # Segment revenue chart.
     rfm = outputs["rfm_segment_summary.csv"].sort_values("segment_revenue").reset_index(drop=True)
@@ -884,6 +1060,7 @@ def main() -> None:
     with create_database(df) as conn:
         outputs = run_sql_outputs(conn)
     outputs["monthly_forecast.csv"] = generate_monthly_forecast(outputs)
+    outputs["customer_profile_summary.csv"] = generate_customer_profile_summary(outputs)
     summary = generate_summary(outputs)
     generate_figures(outputs, summary)
     generate_dashboard(outputs, summary)
@@ -892,8 +1069,10 @@ def main() -> None:
     for csv_name in QUERY_OUTPUTS.values():
         print(f"- {OUTPUT_DIR / csv_name}")
     print(f"- {OUTPUT_DIR / 'monthly_forecast.csv'}")
+    print(f"- {OUTPUT_DIR / 'customer_profile_summary.csv'}")
     print(f"- {OUTPUT_DIR / 'executive_summary.md'}")
     for figure_name in (
+        "customer_profile_overview.svg",
         "segment_revenue.svg",
         "monthly_kpis.svg",
         "monthly_forecast.svg",

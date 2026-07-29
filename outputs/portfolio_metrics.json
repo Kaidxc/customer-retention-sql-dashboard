@@ -19,5 +19,10 @@
   "next_forecast_month": "2012-01-01",
   "next_month_revenue_forecast": 903018.8333,
   "next_month_repeat_purchase_rate_forecast": 0.2446,
-  "forecast_method": "3-month moving average baseline"
+  "forecast_method": "3-month moving average baseline",
+  "one_time_customers": 1623,
+  "repeat_customers": 4255,
+  "median_customer_orders": 3.0,
+  "median_customer_revenue": 887.39,
+  "median_days_since_last_purchase": 96.0
 }

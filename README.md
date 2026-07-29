@@ -23,6 +23,39 @@ The analysis uses a cleaned customer-level version of the data:
 
 Cancelled or unusable records were removed before analysis, including rows with missing customer IDs, non-positive quantities or prices, duplicate transaction lines and records that could not support customer-level targeting. The source and cleaning notes are in [`data/README.md`](data/README.md), and field definitions are in [`documentation/data_dictionary.md`](documentation/data_dictionary.md).
 
+## From transactions to customer profiles
+
+The raw data records what was bought. The decision needs to understand who the customers are. The analysis therefore restructures transaction lines into customer-level profiles.
+
+| Layer | What it represents | Example fields |
+|---|---|---|
+| Transaction line | One product line within an invoice | invoice ID, product, quantity, unit price, line value |
+| Order | One completed customer purchase | invoice ID, customer ID, order date, order value |
+| Customer profile | One row per customer for decision-making | total orders, total revenue, average order value, first purchase, last purchase, days since last purchase, repeat flag |
+| Campaign target | A prioritised customer for testing | priority rank, customer ID, value, inactivity, target reason |
+
+The key customer features used in the analysis are:
+
+- **Frequency:** how many completed orders a customer placed.
+- **Monetary value:** how much revenue the customer generated historically.
+- **Average order value:** typical value per completed order.
+- **Recency:** how many days have passed since the customer's last purchase.
+- **Repeat status:** whether the customer bought once or returned for at least one more order.
+- **RFM segment:** a combined view of recency, frequency and monetary value.
+
+## Customer profile after cleaning
+
+The cleaned customer base contains **5,878 known customers**. It is not evenly distributed: a large group has low order frequency or long inactivity, while a smaller group contributes much higher historical value. This uneven structure is the reason a prioritisation rule is needed.
+
+![Customer profile after cleaning](documentation/figures/customer_profile_overview.svg)
+
+Some important patterns:
+
+- **4,255 customers** are repeat customers, while **1,623 customers** placed only one order.
+- The median customer placed **3 orders**, but the top 5% placed **21 or more** orders.
+- Median customer revenue is **GBP 887**, while the top 5% generated more than **GBP 9,505**.
+- Median inactivity is **96 days**, but **1,614 customers** have not purchased for more than a year.
+
 ## Recommendation
 
 Prioritise the `At Risk High Value` segment for the first retention test.
@@ -145,6 +178,7 @@ flowchart LR
 
 - [`outputs/executive_summary.md`](outputs/executive_summary.md) - generated one-page decision summary.
 - [`dashboard/customer_retention_dashboard.html`](dashboard/customer_retention_dashboard.html) - generated HTML dashboard.
+- [`outputs/customer_profile_summary.csv`](outputs/customer_profile_summary.csv) - customer feature distributions used in the profile overview.
 - [`outputs/campaign_targets.csv`](outputs/campaign_targets.csv) - ranked list of 300 campaign candidates.
 - [`outputs/rfm_segment_summary.csv`](outputs/rfm_segment_summary.csv) - segment-level customer and revenue summary.
 - [`outputs/monthly_kpis.csv`](outputs/monthly_kpis.csv) - monthly revenue, order, customer, AOV and repeat-purchase KPIs.

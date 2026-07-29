@@ -1,0 +1,24 @@
+feature,bucket,customers,customer_share,description
+repeat_status,One-time customer,1623,0.2761,Whether a customer placed one order or at least two orders.
+repeat_status,Repeat customer,4255,0.7239,Whether a customer placed one order or at least two orders.
+total_orders,1,1623,0.2761,Distinct completed orders per customer.
+total_orders,2,944,0.1606,Distinct completed orders per customer.
+total_orders,3-5,1510,0.2569,Distinct completed orders per customer.
+total_orders,6-10,925,0.1574,Distinct completed orders per customer.
+total_orders,11-20,579,0.0985,Distinct completed orders per customer.
+total_orders,21+,297,0.0505,Distinct completed orders per customer.
+total_revenue,<=GBP100,211,0.0359,Historical revenue per customer.
+total_revenue,GBP100-500,1837,0.3125,Historical revenue per customer.
+total_revenue,GBP500-1k,1097,0.1866,Historical revenue per customer.
+total_revenue,GBP1k-5k,2066,0.3515,Historical revenue per customer.
+total_revenue,GBP5k+,667,0.1135,Historical revenue per customer.
+days_since_last_purchase,0-30 days,1628,0.277,Inactivity measured from the analysis date to the customer's last purchase.
+days_since_last_purchase,31-90 days,1261,0.2145,Inactivity measured from the analysis date to the customer's last purchase.
+days_since_last_purchase,91-180 days,588,0.1,Inactivity measured from the analysis date to the customer's last purchase.
+days_since_last_purchase,181-365 days,787,0.1339,Inactivity measured from the analysis date to the customer's last purchase.
+days_since_last_purchase,365+ days,1614,0.2746,Inactivity measured from the analysis date to the customer's last purchase.
+average_order_value,<=GBP25,32,0.0054,Average order value per customer.
+average_order_value,GBP25-50,54,0.0092,Average order value per customer.
+average_order_value,GBP50-100,287,0.0488,Average order value per customer.
+average_order_value,GBP100-250,2132,0.3627,Average order value per customer.
+average_order_value,GBP250+,3373,0.5738,Average order value per customer.

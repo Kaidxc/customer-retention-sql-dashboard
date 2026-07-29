@@ -12,6 +12,7 @@ python scripts/build_customer_retention_outputs.py
 |---|---|
 | `dataset_overview.csv` | Overall dataset size, revenue and analysis date |
 | `customer_metrics.csv` | One row per customer with KPI and recency metrics |
+| `customer_profile_summary.csv` | Bucketed customer feature distributions used in the profile overview chart |
 | `rfm_segments.csv` | One row per customer with RFM scores and segment label |
 | `rfm_segment_summary.csv` | Segment-level customers, revenue and average recency |
 | `cohort_retention.csv` | Monthly cohort retention table for heatmaps |

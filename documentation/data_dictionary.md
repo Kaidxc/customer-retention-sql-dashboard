@@ -30,6 +30,9 @@
 | `frequency_score` | 1 to 5 score where 5 means most frequent |
 | `monetary_score` | 1 to 5 score where 5 means highest revenue |
 | `retention_rate` | Retained customers divided by original cohort size |
+| `feature` | Customer profile feature being summarised in `customer_profile_summary.csv` |
+| `bucket` | Bucket label used to group customers for a profile distribution |
+| `customer_share` | Customers in a bucket divided by all known customers |
 | `affected_rows` | Number of rows affected by a data quality check |
 | `affected_share` | Affected rows divided by total clean transaction rows |
 | `forecast_value` | Forecast produced by the 3-month moving average baseline |

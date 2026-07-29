@@ -15,6 +15,8 @@ Identify which existing customers should be prioritised for a retention campaign
 ## Key findings
 
 - Repeat purchase rate across known customers is 72.4%.
+- Customer base: 4,255 repeat customers and 1,623 one-time customers.
+- Median customer profile: 3 orders, GBP 887 revenue and 96 days since last purchase.
 - The highest revenue RFM segment is `Champions`, contributing GBP 12,156,257.
 - `397` customers are classified as `At Risk High Value`, representing GBP 1,465,866 in historical revenue.
 - The campaign target list contains `300` customers prioritised by historical value, order frequency, and inactivity.
@@ -28,6 +30,7 @@ Prioritise the `At Risk High Value` segment first. These customers have meaningf
 
 ## Evidence for decision-makers
 
+- [Customer profile overview](../documentation/figures/customer_profile_overview.svg) shows the cleaned customer base by repeat status, order frequency, revenue and inactivity.
 - [Segment revenue view](../documentation/figures/segment_revenue.svg) shows where historical value is concentrated and highlights the retention opportunity.
 - [Monthly KPI trend](../documentation/figures/monthly_kpis.svg) shows how revenue and monthly repeat purchasing change over time.
 - [Monthly forecast baseline](../documentation/figures/monthly_forecast.svg) shows a transparent short-term revenue planning baseline.
