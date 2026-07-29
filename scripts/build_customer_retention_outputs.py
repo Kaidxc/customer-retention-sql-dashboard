@@ -1218,93 +1218,12 @@ def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object
         )
 
 
-def table_html(df: pd.DataFrame, max_rows: int = 10) -> str:
-    subset = df.head(max_rows).copy()
-    rows = []
-    rows.append("<table>")
-    rows.append("<thead><tr>")
-    for col in subset.columns:
-        rows.append(f"<th>{html.escape(str(col))}</th>")
-    rows.append("</tr></thead><tbody>")
-    for _, row in subset.iterrows():
-        rows.append("<tr>")
-        for value in row:
-            rows.append(f"<td>{html.escape(str(value))}</td>")
-        rows.append("</tr>")
-    rows.append("</tbody></table>")
-    return "\n".join(rows)
+def inline_svg(filename: str) -> str:
+    return (FIGURES_DIR / filename).read_text(encoding="utf-8")
 
 
 def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, object]) -> None:
     DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
-    top_revenue = outputs["top_products_by_revenue.csv"].copy()
-    top_quantity = outputs["top_products_by_quantity.csv"].copy()
-    slow = outputs["slow_moving_product_candidates.csv"].head(12).copy()
-    forecast = outputs["product_next_quarter_forecast.csv"].head(12).copy()
-    concentration = outputs["product_revenue_concentration.csv"].copy()
-
-    top_revenue_table = top_revenue[
-        [
-            "stock_code",
-            "product_description",
-            "total_revenue",
-            "total_quantity",
-            "order_count",
-            "customer_count",
-        ]
-    ].copy()
-    top_revenue_table["total_revenue"] = top_revenue_table["total_revenue"].map(
-        lambda x: as_money(float(x))
-    )
-
-    top_quantity_table = top_quantity[
-        [
-            "stock_code",
-            "product_description",
-            "total_quantity",
-            "total_revenue",
-            "order_count",
-            "customer_count",
-        ]
-    ].copy()
-    top_quantity_table["total_revenue"] = top_quantity_table["total_revenue"].map(
-        lambda x: as_money(float(x))
-    )
-
-    slow_table = slow[
-        [
-            "stock_code",
-            "product_description",
-            "total_revenue",
-            "days_since_last_sale",
-            "active_months",
-        ]
-    ].copy()
-    slow_table["total_revenue"] = slow_table["total_revenue"].map(
-        lambda x: as_money(float(x))
-    )
-
-    forecast_table = forecast[
-        [
-            "stock_code",
-            "product_description",
-            "next_quarter",
-            "forecast_quantity",
-            "forecast_revenue",
-        ]
-    ].copy()
-    forecast_table["forecast_revenue"] = forecast_table["forecast_revenue"].map(
-        lambda x: as_money(float(x))
-    )
-
-    concentration_table = concentration.copy()
-    concentration_table["group_revenue"] = concentration_table["group_revenue"].map(
-        lambda x: as_money(float(x))
-    )
-    concentration_table["revenue_share"] = concentration_table["revenue_share"].map(
-        lambda x: as_pct(float(x))
-    )
-
     html_doc = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -1319,6 +1238,8 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
       --blue: #2f5fbb;
       --green: #24795b;
       --amber: #9d6420;
+      --red: #c2410c;
+      --purple: #7c3aed;
       --bg: #f7f8fb;
       --panel: #ffffff;
     }}
@@ -1329,7 +1250,7 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
       background: var(--bg);
     }}
     header {{
-      padding: 28px 36px 18px;
+      padding: 30px 38px 22px;
       background: var(--panel);
       border-bottom: 1px solid var(--line);
     }}
@@ -1341,6 +1262,10 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
     h2 {{
       font-size: 18px;
       margin: 0 0 14px;
+    }}
+    h3 {{
+      margin: 0 0 8px;
+      font-size: 15px;
     }}
     p {{
       color: var(--muted);
@@ -1357,7 +1282,7 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
       grid-template-columns: repeat(4, minmax(160px, 1fr));
       gap: 14px;
     }}
-    .kpi, section {{
+    .kpi, section, .action-card {{
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -1374,76 +1299,60 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
       font-size: 24px;
       font-weight: 700;
     }}
-    .grid-2 {{
+    .kpi-note {{
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+    }}
+    .grid-2, .visual-grid {{
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 22px;
     }}
-    .bar-row {{
+    .story-grid {{
       display: grid;
-      grid-template-columns: 150px 1fr 220px;
-      align-items: center;
-      gap: 12px;
-      margin: 11px 0;
-      font-size: 13px;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 14px;
     }}
-    .bar-track {{
-      height: 12px;
-      border-radius: 4px;
-      background: #e9edf5;
-      overflow: hidden;
-    }}
-    .bar-fill {{
-      height: 100%;
-      background: var(--blue);
-    }}
-    .bar-value {{
-      color: var(--muted);
-      text-align: right;
-    }}
-    table {{
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }}
-    th, td {{
-      padding: 8px 9px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      white-space: nowrap;
-    }}
-    th {{
-      color: var(--muted);
-      font-weight: 700;
+    .story-card {{
       background: #fbfcff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
     }}
     .note {{
       color: var(--muted);
       font-size: 13px;
       margin-top: 10px;
     }}
-    .figure-grid {{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 22px;
+    .chart-panel {{
+      overflow: hidden;
     }}
-    figure {{
-      margin: 0;
-    }}
-    figure img {{
-      display: block;
+    .chart-panel svg {{
       width: 100%;
       height: auto;
+      display: block;
+    }}
+    .action-grid {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 14px;
+    }}
+    .accent-blue {{ border-top: 4px solid var(--blue); }}
+    .accent-green {{ border-top: 4px solid var(--green); }}
+    .accent-red {{ border-top: 4px solid var(--red); }}
+    .accent-purple {{ border-top: 4px solid var(--purple); }}
+    .csv-note {{
+      border: 1px dashed var(--line);
+      background: #fbfcff;
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: var(--muted);
+      font-size: 13px;
     }}
     @media (max-width: 900px) {{
-      .kpi-grid, .grid-2, .figure-grid {{
+      .kpi-grid, .grid-2, .visual-grid, .story-grid, .action-grid {{
         grid-template-columns: 1fr;
-      }}
-      .bar-row {{
-        grid-template-columns: 1fr;
-      }}
-      .bar-value {{
-        text-align: left;
       }}
     }}
   </style>
@@ -1451,76 +1360,77 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
 <body>
   <header>
     <h1>Online Retail Product Sales Dashboard</h1>
-    <p>Product performance, top sellers, slow-moving candidates and next-quarter planning baseline.</p>
+    <p>Visual summary of product range, customer purchase behaviour, sales leaders, slow-moving products and next-quarter planning baseline.</p>
   </header>
   <main>
     <div class="kpi-grid">
-      <div class="kpi"><div class="kpi-title">Total Revenue</div><div class="kpi-value">{as_money(float(summary["total_revenue"]))}</div></div>
-      <div class="kpi"><div class="kpi-title">Merchandise Products</div><div class="kpi-value">{int(summary["merchandise_products"]):,}</div></div>
-      <div class="kpi"><div class="kpi-title">Orders</div><div class="kpi-value">{int(summary["distinct_orders"]):,}</div></div>
-      <div class="kpi"><div class="kpi-title">Top 500 Revenue Share</div><div class="kpi-value">{as_pct(float(summary["top_500_revenue_share"]))}</div></div>
+      <div class="kpi"><div class="kpi-title">Revenue Analysed</div><div class="kpi-value">{as_money(float(summary["total_revenue"]))}</div><div class="kpi-note">2009-12 to 2011-12</div></div>
+      <div class="kpi"><div class="kpi-title">Products Analysed</div><div class="kpi-value">{int(summary["merchandise_products"]):,}</div><div class="kpi-note">merchandise products</div></div>
+      <div class="kpi"><div class="kpi-title">Completed Orders</div><div class="kpi-value">{int(summary["distinct_orders"]):,}</div><div class="kpi-note">prepared transactions</div></div>
+      <div class="kpi"><div class="kpi-title">Top 500 Products</div><div class="kpi-value">{as_pct(float(summary["top_500_revenue_share"]))}</div><div class="kpi-note">of merchandise revenue</div></div>
     </div>
 
-    <div class="figure-grid">
-      <section>
-        <h2>Catalogue Structure</h2>
-        <figure><img src="../documentation/figures/product_catalog_overview.svg" alt="Product catalogue overview"></figure>
+    <div class="story-grid">
+      <div class="story-card accent-blue"><h3>Core range</h3><p>{summary["top_500_revenue_share"]:.0%} of merchandise revenue comes from the top 500 products, so planning should start with the stronger sellers.</p></div>
+      <div class="story-card accent-green"><h3>Purchase behaviour</h3><p>{summary["repeat_customers"]:,} customers placed at least two orders, and the median order contains {summary["median_units_per_order"]:,.0f} units.</p></div>
+      <div class="story-card accent-purple"><h3>Next quarter</h3><p>The baseline forecasts {summary["forecast_top_product_quantity"]:,.0f} units and {as_money(float(summary["forecast_top_product_revenue"]))} revenue for 20 stable products.</p></div>
+    </div>
+
+    <div class="visual-grid">
+      <section class="chart-panel">
+        <h2>Product Range</h2>
+        {inline_svg("product_catalog_overview.svg")}
       </section>
-      <section>
+      <section class="chart-panel">
         <h2>Customer and Purchase Behaviour</h2>
-        <figure><img src="../documentation/figures/customer_purchase_overview.svg" alt="Customer and purchase behaviour overview"></figure>
-      </section>
-      <section>
-        <h2>Monthly Sales Trend</h2>
-        <figure><img src="../documentation/figures/monthly_kpis.svg" alt="Monthly sales and order trend"></figure>
-      </section>
-      <section>
-        <h2>Next-Quarter Baseline</h2>
-        <figure><img src="../documentation/figures/product_forecast_next_quarter.svg" alt="Next-quarter product forecast"></figure>
+        {inline_svg("customer_purchase_overview.svg")}
       </section>
     </div>
 
-    <section>
-      <h2>Revenue Concentration</h2>
-      {table_html(concentration_table, max_rows=5)}
-      <div class="note">Service and administrative stock lines are excluded from merchandise revenue concentration.</div>
-    </section>
+    <div class="visual-grid">
+      <section class="chart-panel">
+        <h2>Monthly Sales Context</h2>
+        {inline_svg("monthly_kpis.svg")}
+      </section>
+      <section class="chart-panel">
+        <h2>Next-Quarter Core Product Forecast</h2>
+        {inline_svg("product_forecast_next_quarter.svg")}
+      </section>
+    </div>
 
-    <div class="grid-2">
-      <section>
+    <div class="visual-grid">
+      <section class="chart-panel">
         <h2>Top Products by Revenue</h2>
-        <figure><img src="../documentation/figures/top_products_by_revenue.svg" alt="Top products by revenue"></figure>
-        {table_html(top_revenue_table, max_rows=10)}
+        {inline_svg("top_products_by_revenue.svg")}
       </section>
-      <section>
+      <section class="chart-panel">
         <h2>Top Products by Units Sold</h2>
-        <figure><img src="../documentation/figures/top_products_by_quantity.svg" alt="Top products by units sold"></figure>
-        {table_html(top_quantity_table, max_rows=10)}
+        {inline_svg("top_products_by_quantity.svg")}
       </section>
     </div>
 
-    <div class="grid-2">
-      <section>
+    <div class="visual-grid">
+      <section class="chart-panel">
         <h2>Slow-Moving Product Candidates</h2>
-        <figure><img src="../documentation/figures/slow_moving_products.svg" alt="Slow-moving product candidates"></figure>
-        {table_html(slow_table, max_rows=12)}
+        {inline_svg("slow_moving_products.svg")}
       </section>
       <section>
-        <h2>Forecast Table</h2>
-        {table_html(forecast_table, max_rows=12)}
-        <div class="note">Forecast uses the average of the last four quarters for stable high-revenue merchandise products.</div>
+        <h2>Product Actions</h2>
+        <div class="action-grid">
+          <div class="action-card accent-blue"><h3>Protect availability</h3><p>Start with high-revenue products that appear across many orders and customers.</p></div>
+          <div class="action-card accent-green"><h3>Build baskets</h3><p>Use high-unit lower-revenue products as add-ons, bundles or merchandising support.</p></div>
+          <div class="action-card accent-red"><h3>Review inactive items</h3><p>Check stockout, seasonality or discontinuation before discounting or delisting.</p></div>
+          <div class="action-card accent-purple"><h3>Plan core products</h3><p>Use the forecast as a planning baseline for stable products, not as an automated buying decision.</p></div>
+        </div>
       </section>
     </div>
 
-    <section>
-      <h2>Product Actions</h2>
-      <p>Protect availability for high-revenue products, use high-unit lower-revenue products for bundles and add-ons, review slow-moving products before discounting or delisting, and treat the forecast as a planning baseline rather than a final buying decision.</p>
-    </section>
+    <div class="csv-note">Detailed tables are kept in the generated CSV files in <strong>outputs/</strong>. This dashboard is intentionally visual-first.</div>
   </main>
 </body>
 </html>
 """
-    (DASHBOARD_DIR / "customer_retention_dashboard.html").write_text(
+    (DASHBOARD_DIR / "product_sales_dashboard.html").write_text(
         html_doc, encoding="utf-8"
     )
 
@@ -1565,7 +1475,7 @@ def main() -> None:
         "monthly_forecast.svg",
     ):
         print(f"- {FIGURES_DIR / figure_name}")
-    print(f"- {DASHBOARD_DIR / 'customer_retention_dashboard.html'}")
+    print(f"- {DASHBOARD_DIR / 'product_sales_dashboard.html'}")
 
 
 if __name__ == "__main__":

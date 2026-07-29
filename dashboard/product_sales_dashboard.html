@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Online Retail Product Sales Dashboard</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #5b6675;
+      --line: #d9dee7;
+      --blue: #2f5fbb;
+      --green: #24795b;
+      --amber: #9d6420;
+      --red: #c2410c;
+      --purple: #7c3aed;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    header {
+      padding: 30px 38px 22px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+    h2 {
+      font-size: 18px;
+      margin: 0 0 14px;
+    }
+    h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+    p {
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+    main {
+      padding: 24px 36px 40px;
+      display: grid;
+      gap: 22px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 14px;
+    }
+    .kpi, section, .action-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .kpi-title {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+    }
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .kpi-note {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    .grid-2, .visual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+    .story-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .story-card {
+      background: #fbfcff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    .chart-panel {
+      overflow: hidden;
+    }
+    .chart-panel svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 14px;
+    }
+    .accent-blue { border-top: 4px solid var(--blue); }
+    .accent-green { border-top: 4px solid var(--green); }
+    .accent-red { border-top: 4px solid var(--red); }
+    .accent-purple { border-top: 4px solid var(--purple); }
+    .csv-note {
+      border: 1px dashed var(--line);
+      background: #fbfcff;
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      .kpi-grid, .grid-2, .visual-grid, .story-grid, .action-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Online Retail Product Sales Dashboard</h1>
+    <p>Visual summary of product range, customer purchase behaviour, sales leaders, slow-moving products and next-quarter planning baseline.</p>
+  </header>
+  <main>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-title">Revenue Analysed</div><div class="kpi-value">GBP 17,685,461</div><div class="kpi-note">2009-12 to 2011-12</div></div>
+      <div class="kpi"><div class="kpi-title">Products Analysed</div><div class="kpi-value">4,626</div><div class="kpi-note">merchandise products</div></div>
+      <div class="kpi"><div class="kpi-title">Completed Orders</div><div class="kpi-value">36,969</div><div class="kpi-note">prepared transactions</div></div>
+      <div class="kpi"><div class="kpi-title">Top 500 Products</div><div class="kpi-value">64.0%</div><div class="kpi-note">of merchandise revenue</div></div>
+    </div>
+
+    <div class="story-grid">
+      <div class="story-card accent-blue"><h3>Core range</h3><p>64% of merchandise revenue comes from the top 500 products, so planning should start with the stronger sellers.</p></div>
+      <div class="story-card accent-green"><h3>Purchase behaviour</h3><p>4,255 customers placed at least two orders, and the median order contains 154 units.</p></div>
+      <div class="story-card accent-purple"><h3>Next quarter</h3><p>The baseline forecasts 76,320 units and GBP 205,589 revenue for 20 stable products.</p></div>
+    </div>
+
+    <div class="visual-grid">
+      <section class="chart-panel">
+        <h2>Product Range</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="chart-title chart-description">
+  <title id="chart-title">Product catalogue overview</title>
+  <desc id="chart-description">Business snapshot showing total product range, stable core products, high-value products, dormant products and revenue concentration.</desc>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif"><text x="55.0" y="48.0" font-size="20px" text-anchor="start" font-weight="500" fill="#17202a">Product range snapshot: many products, smaller core of stronger sellers</text><text x="55.0" y="76.0" font-size="13px" text-anchor="start" font-weight="400" fill="#5b6675">Management takeaway: plan the stable core carefully, and review low-selling items with clear rules.</text><rect x="55" y="115" width="250" height="145" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="77.0" y="145.0" font-size="13px" text-anchor="start" font-weight="400" fill="#5b6675">Total range</text><text x="77.0" y="193.0" font-size="32px" text-anchor="start" font-weight="700" fill="#2563eb">4,626</text><text x="77.0" y="227.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">merchandise products</text><text x="77.0" y="247.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">included in analysis</text><rect x="325" y="115" width="250" height="145" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="347.0" y="145.0" font-size="13px" text-anchor="start" font-weight="400" fill="#5b6675">Stable core</text><text x="347.0" y="193.0" font-size="32px" text-anchor="start" font-weight="700" fill="#0f766e">1,464</text><text x="347.0" y="227.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">products sold in</text><text x="347.0" y="247.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">19-25 months</text><rect x="595" y="115" width="250" height="145" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="617.0" y="145.0" font-size="13px" text-anchor="start" font-weight="400" fill="#5b6675">High-value items</text><text x="617.0" y="193.0" font-size="32px" text-anchor="start" font-weight="700" fill="#c2410c">28</text><text x="617.0" y="227.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">products generated</text><text x="617.0" y="247.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">GBP 50k+ revenue</text><rect x="865" y="115" width="250" height="145" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="887.0" y="145.0" font-size="13px" text-anchor="start" font-weight="400" fill="#5b6675">Low-selling review</text><text x="887.0" y="193.0" font-size="32px" text-anchor="start" font-weight="700" fill="#7c3aed">1,004</text><text x="887.0" y="227.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">products had no sale</text><text x="887.0" y="247.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">for 365+ days</text><rect x="55" y="290" width="1090" height="145" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="85.0" y="318.0" font-size="15px" text-anchor="start" font-weight="500" fill="#17202a">Revenue concentration</text><rect x="85" y="330" width="1030" height="46" rx="5" fill="#eef2f7"/><rect x="85.0" y="330" width="307.0" height="46" rx="5" fill="#2563eb"/><text x="238.5" y="360.0" font-size="13px" text-anchor="middle" font-weight="500" fill="#ffffff">30%</text><rect x="392.0" y="330" width="352.2" height="46" rx="5" fill="#0f766e"/><text x="568.1" y="360.0" font-size="13px" text-anchor="middle" font-weight="500" fill="#ffffff">34%</text><rect x="744.2" y="330" width="370.8" height="46" rx="5" fill="#94a3b8"/><text x="929.6" y="360.0" font-size="13px" text-anchor="middle" font-weight="500" fill="#17202a">36%</text><rect x="85" y="393" width="13" height="13" rx="2" fill="#2563eb"/><text x="105.0" y="405.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">Top 100 products: 29.8%</text><rect x="390" y="393" width="13" height="13" rx="2" fill="#0f766e"/><text x="410.0" y="405.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">Products 101-500: 34.2%</text><rect x="695" y="393" width="13" height="13" rx="2" fill="#94a3b8"/><text x="715.0" y="405.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">Remaining products: 36.0%</text><rect x="55" y="475" width="1090" height="145" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="85.0" y="505.0" font-size="15px" text-anchor="start" font-weight="500" fill="#17202a">How to use this insight</text><text x="85.0" y="545.0" font-size="14px" text-anchor="start" font-weight="500" fill="#17202a">Plan individually</text><text x="85.0" y="575.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">Stable, high-revenue products are suitable</text><text x="85.0" y="595.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">for stock and forecast review.</text><text x="430.0" y="545.0" font-size="14px" text-anchor="start" font-weight="500" fill="#17202a">Review lifecycle</text><text x="430.0" y="575.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">Products with no recent sale need checks for</text><text x="430.0" y="595.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">discontinuation, seasonality or stockout.</text><text x="775.0" y="545.0" font-size="14px" text-anchor="start" font-weight="500" fill="#17202a">Manage by rules</text><text x="775.0" y="575.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">Low-selling items should use category or</text><text x="775.0" y="595.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">lifecycle rules rather than manual planning.</text></g>
+</svg>
+
+      </section>
+      <section class="chart-panel">
+        <h2>Customer and Purchase Behaviour</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="chart-title chart-description">
+  <title id="chart-title">Customer and purchase behaviour overview</title>
+  <desc id="chart-description">Panels show repeat status, orders per customer, order value and units per order.</desc>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif"><text x="55.0" y="48.0" font-size="20px" text-anchor="start" font-weight="500" fill="#17202a">Customer and purchase behaviour after cleaning</text><text x="55.0" y="76.0" font-size="13px" text-anchor="start" font-weight="400" fill="#5b6675">5,878 known customers | 36,969 completed orders | median order value: GBP 305</text><rect x="52" y="110" width="531" height="160" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="70.0" y="135.0" font-size="15px" text-anchor="start" font-weight="500" fill="#17202a">Customer repeat status</text><text x="70.0" y="187.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">One-time customer</text><rect x="186" y="170" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="186" y="170" width="95.7" height="24" rx="4" fill="#2563eb"/><text x="449.0" y="187.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">1,623 (28%)</text><text x="70.0" y="220.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">Repeat customer</text><rect x="186" y="203" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="186" y="203" width="251.0" height="24" rx="4" fill="#2563eb"/><text x="449.0" y="220.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">4,255 (72%)</text><rect x="647" y="110" width="531" height="290" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="665.0" y="135.0" font-size="15px" text-anchor="start" font-weight="500" fill="#17202a">Orders per customer</text><text x="665.0" y="187.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">1</text><rect x="781" y="170" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="170" width="251.0" height="24" rx="4" fill="#0f766e"/><text x="1044.0" y="187.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">1,623 (28%)</text><text x="665.0" y="220.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">2</text><rect x="781" y="203" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="203" width="146.0" height="24" rx="4" fill="#0f766e"/><text x="1044.0" y="220.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">944 (16%)</text><text x="665.0" y="253.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">3-5</text><rect x="781" y="236" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="236" width="233.5" height="24" rx="4" fill="#0f766e"/><text x="1044.0" y="253.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">1,510 (26%)</text><text x="665.0" y="286.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">6-10</text><rect x="781" y="269" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="269" width="143.1" height="24" rx="4" fill="#0f766e"/><text x="1044.0" y="286.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">925 (16%)</text><text x="665.0" y="319.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">11-20</text><rect x="781" y="302" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="302" width="89.5" height="24" rx="4" fill="#0f766e"/><text x="1044.0" y="319.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">579 (10%)</text><text x="665.0" y="352.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">21+</text><rect x="781" y="335" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="335" width="45.9" height="24" rx="4" fill="#0f766e"/><text x="1044.0" y="352.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">297 (5%)</text><rect x="52" y="420" width="531" height="250" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="70.0" y="445.0" font-size="15px" text-anchor="start" font-weight="500" fill="#17202a">Order value</text><text x="70.0" y="497.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">&lt;=GBP25</text><rect x="186" y="480" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="186" y="480" width="26.2" height="24" rx="4" fill="#c2410c"/><text x="449.0" y="497.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">1,349 (4%)</text><text x="70.0" y="530.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">GBP25-50</text><rect x="186" y="513" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="186" y="513" width="20.3" height="24" rx="4" fill="#c2410c"/><text x="449.0" y="530.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">1,042 (3%)</text><text x="70.0" y="563.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">GBP50-100</text><rect x="186" y="546" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="186" y="546" width="40.2" height="24" rx="4" fill="#c2410c"/><text x="449.0" y="563.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">2,067 (6%)</text><text x="70.0" y="596.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">GBP100-250</text><rect x="186" y="579" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="186" y="579" width="208.5" height="24" rx="4" fill="#c2410c"/><text x="449.0" y="596.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">10,715 (29%)</text><text x="70.0" y="629.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">GBP250-500</text><rect x="186" y="612" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="186" y="612" width="251.0" height="24" rx="4" fill="#c2410c"/><text x="449.0" y="629.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">12,902 (35%)</text><text x="70.0" y="662.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">GBP500+</text><rect x="186" y="645" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="186" y="645" width="173.0" height="24" rx="4" fill="#c2410c"/><text x="449.0" y="662.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">8,894 (24%)</text><rect x="647" y="420" width="531" height="250" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/><text x="665.0" y="445.0" font-size="15px" text-anchor="start" font-weight="500" fill="#17202a">Units per order</text><text x="665.0" y="497.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">1-5</text><rect x="781" y="480" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="480" width="12.5" height="24" rx="4" fill="#7c3aed"/><text x="1044.0" y="497.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">1,211 (3%)</text><text x="665.0" y="530.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">6-10</text><rect x="781" y="513" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="513" width="6.1" height="24" rx="4" fill="#7c3aed"/><text x="1044.0" y="530.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">586 (2%)</text><text x="665.0" y="563.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">11-25</text><rect x="781" y="546" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="546" width="18.0" height="24" rx="4" fill="#7c3aed"/><text x="1044.0" y="563.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">1,743 (5%)</text><text x="665.0" y="596.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">26-50</text><rect x="781" y="579" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="579" width="29.5" height="24" rx="4" fill="#7c3aed"/><text x="1044.0" y="596.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">2,854 (8%)</text><text x="665.0" y="629.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">51-100</text><rect x="781" y="612" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="612" width="65.6" height="24" rx="4" fill="#7c3aed"/><text x="1044.0" y="629.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">6,332 (17%)</text><text x="665.0" y="662.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">101+</text><rect x="781" y="645" width="251" height="24" rx="4" fill="#eef2f7"/><rect x="781" y="645" width="251.0" height="24" rx="4" fill="#7c3aed"/><text x="1044.0" y="662.0" font-size="12px" text-anchor="start" font-weight="400" fill="#334155">24,243 (66%)</text></g>
+</svg>
+
+      </section>
+    </div>
+
+    <div class="visual-grid">
+      <section class="chart-panel">
+        <h2>Monthly Sales Context</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="670" viewBox="0 0 1100 670" role="img" aria-labelledby="chart-title chart-description">
+  <title id="chart-title">Monthly sales and order trend</title>
+  <desc id="chart-description">Two line charts show monthly revenue and completed orders.</desc>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif"><text x="80.0" y="42.0" font-size="19px" text-anchor="start" font-weight="500" fill="#17202a">Monthly sales trend provides context before product planning</text><text x="105.0" y="82.0" font-size="16px" text-anchor="start" font-weight="500" fill="#17202a">Monthly revenue</text><line x1="105" y1="302.0" x2="1005" y2="302.0" stroke="#d9dee7" stroke-width="1"/><text x="95.0" y="306.0" font-size="11px" text-anchor="end" font-weight="400" fill="#5b6675">GBP 0.0m</text><line x1="105" y1="206.0" x2="1005" y2="206.0" stroke="#d9dee7" stroke-width="1"/><text x="95.0" y="210.0" font-size="11px" text-anchor="end" font-weight="400" fill="#5b6675">GBP 0.7m</text><line x1="105" y1="110.0" x2="1005" y2="110.0" stroke="#d9dee7" stroke-width="1"/><text x="95.0" y="114.0" font-size="11px" text-anchor="end" font-weight="400" fill="#5b6675">GBP 1.3m</text><polyline points="105.0,201.5 142.5,220.3 180.0,227.8 217.5,199.6 255.0,215.0 292.5,214.1 330.0,208.5 367.5,215.3 405.0,213.5 442.5,180.2 480.0,150.2 517.5,130.6 555.0,172.5 592.5,218.5 630.0,236.4 667.5,214.7 705.0,233.2 742.5,202.5 780.0,205.0 817.5,214.0 855.0,207.3 892.5,162.3 930.0,149.8 967.5,132.1 1005.0,226.0" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="201.5" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="142.5" cy="220.3" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="180.0" cy="227.8" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="217.5" cy="199.6" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="255.0" cy="215.0" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="292.5" cy="214.1" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="330.0" cy="208.5" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="367.5" cy="215.3" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="405.0" cy="213.5" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="442.5" cy="180.2" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="480.0" cy="150.2" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="517.5" cy="130.6" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="555.0" cy="172.5" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="592.5" cy="218.5" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="630.0" cy="236.4" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="667.5" cy="214.7" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="705.0" cy="233.2" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="742.5" cy="202.5" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="780.0" cy="205.0" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="817.5" cy="214.0" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="855.0" cy="207.3" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="892.5" cy="162.3" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="930.0" cy="149.8" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="967.5" cy="132.1" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><circle cx="1005.0" cy="226.0" r="4" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><text x="105.0" y="324.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2009-12</text><text x="255.0" y="324.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2010-04</text><text x="405.0" y="324.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2010-08</text><text x="555.0" y="324.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2010-12</text><text x="705.0" y="324.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2011-04</text><text x="855.0" y="324.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2011-08</text><text x="1005.0" y="324.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2011-12</text><text x="105.0" y="375.0" font-size="16px" text-anchor="start" font-weight="500" fill="#17202a">Monthly orders</text><line x1="105" y1="595.0" x2="1005" y2="595.0" stroke="#d9dee7" stroke-width="1"/><text x="95.0" y="599.0" font-size="11px" text-anchor="end" font-weight="400" fill="#5b6675">0</text><line x1="105" y1="499.0" x2="1005" y2="499.0" stroke="#d9dee7" stroke-width="1"/><text x="95.0" y="503.0" font-size="11px" text-anchor="end" font-weight="400" fill="#5b6675">1,488</text><line x1="105" y1="403.0" x2="1005" y2="403.0" stroke="#d9dee7" stroke-width="1"/><text x="95.0" y="407.0" font-size="11px" text-anchor="end" font-weight="400" fill="#5b6675">2,976</text><polyline points="105.0,497.4 142.5,529.8 180.0,523.8 217.5,496.7 255.0,509.3 292.5,506.2 330.0,498.4 367.5,505.9 405.0,511.6 442.5,486.0 480.0,457.4 517.5,428.1 555.0,504.7 592.5,531.3 630.0,530.7 667.5,509.8 705.0,520.9 742.5,494.7 780.0,505.1 817.5,509.1 855.0,512.4 892.5,481.8 930.0,470.5 967.5,423.6 1005.0,544.8" fill="none" stroke="#0f766e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="105.0" cy="497.4" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="142.5" cy="529.8" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="180.0" cy="523.8" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="217.5" cy="496.7" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="255.0" cy="509.3" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="292.5" cy="506.2" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="330.0" cy="498.4" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="367.5" cy="505.9" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="405.0" cy="511.6" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="442.5" cy="486.0" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="480.0" cy="457.4" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="517.5" cy="428.1" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="555.0" cy="504.7" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="592.5" cy="531.3" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="630.0" cy="530.7" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="667.5" cy="509.8" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="705.0" cy="520.9" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="742.5" cy="494.7" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="780.0" cy="505.1" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="817.5" cy="509.1" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="855.0" cy="512.4" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="892.5" cy="481.8" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="930.0" cy="470.5" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="967.5" cy="423.6" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><circle cx="1005.0" cy="544.8" r="4" fill="#ffffff" stroke="#0f766e" stroke-width="2"/><text x="105.0" y="617.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2009-12</text><text x="255.0" y="617.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2010-04</text><text x="405.0" y="617.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2010-08</text><text x="555.0" y="617.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2010-12</text><text x="705.0" y="617.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2011-04</text><text x="855.0" y="617.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2011-08</text><text x="1005.0" y="617.0" font-size="10px" text-anchor="middle" font-weight="400" fill="#5b6675">2011-12</text></g>
+</svg>
+
+      </section>
+      <section class="chart-panel">
+        <h2>Next-Quarter Core Product Forecast</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="chart-title chart-description">
+  <title id="chart-title">Next-quarter product forecast</title>
+  <desc id="chart-description">Last-four-quarter average forecast for stable high-revenue merchandise products.</desc>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif"><text x="55.0" y="45.0" font-size="20px" text-anchor="start" font-weight="500" fill="#17202a">Next-quarter revenue baseline for stable high-revenue products (2012-Q1)</text><text x="349.0" y="111.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">48138 | DOORMAT UNION FLAG</text><rect x="365" y="88" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="88" width="112.7" height="34" rx="4" fill="#0f766e"/><text x="489.7" y="111.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 5,530 | 852 units</text><text x="349.0" y="161.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">21137 | BLACK RECORD COVER FRAME</text><rect x="365" y="138" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="138" width="167.0" height="34" rx="4" fill="#0f766e"/><text x="544.0" y="161.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 8,199 | 2,391 units</text><text x="349.0" y="211.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">22386 | JUMBO BAG PINK WITH WHITE SPOTS</text><rect x="365" y="188" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="188" width="185.6" height="34" rx="4" fill="#0f766e"/><text x="562.6" y="211.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 9,110 | 4,925 units</text><text x="349.0" y="261.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">79321 | CHILLI LIGHTS</text><rect x="365" y="238" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="238" width="204.1" height="34" rx="4" fill="#0f766e"/><text x="581.1" y="261.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 10,016 | 2,044 units</text><text x="349.0" y="311.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">22086 | PAPER CHAIN KIT 50&#x27;S CHRISTMAS</text><rect x="365" y="288" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="288" width="193.5" height="34" rx="4" fill="#0f766e"/><text x="570.5" y="311.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 9,497 | 3,475 units</text><text x="349.0" y="361.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">47566 | PARTY BUNTING</text><rect x="365" y="338" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="338" width="346.3" height="34" rx="4" fill="#0f766e"/><text x="723.3" y="361.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 16,998 | 3,772 units</text><text x="349.0" y="411.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">84879 | ASSORTED COLOUR BIRD ORNAMENT</text><rect x="365" y="388" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="388" width="268.7" height="34" rx="4" fill="#0f766e"/><text x="645.7" y="411.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 13,190 | 8,251 units</text><text x="349.0" y="461.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">85099B | RED RETROSPOT JUMBO BAG</text><rect x="365" y="438" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="438" width="414.7" height="34" rx="4" fill="#0f766e"/><text x="791.7" y="461.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 20,355 | 11,006 units</text><text x="349.0" y="511.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">85123A | WHITE HANGING HEART T-LIGHT HOLDER</text><rect x="365" y="488" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="488" width="463.2" height="34" rx="4" fill="#0f766e"/><text x="840.2" y="511.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 22,736 | 8,288 units</text><text x="349.0" y="561.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">22423 | REGENCY CAKESTAND 3 TIER</text><rect x="365" y="538" width="635" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="538" width="635.0" height="34" rx="4" fill="#0f766e"/><text x="1012.0" y="561.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 31,171 | 2,705 units</text></g>
+</svg>
+
+      </section>
+    </div>
+
+    <div class="visual-grid">
+      <section class="chart-panel">
+        <h2>Top Products by Revenue</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="chart-title chart-description">
+  <title id="chart-title">Top 10 merchandise products by revenue</title>
+  <desc id="chart-description">Horizontal bar chart for Top 10 merchandise products by revenue.</desc>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif"><text x="55.0" y="45.0" font-size="20px" text-anchor="start" font-weight="500" fill="#17202a">Top 10 merchandise products by revenue</text><text x="349.0" y="111.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">22386 | JUMBO BAG PINK WITH WHITE SPOTS</text><rect x="365" y="88" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="88" width="155.4" height="34" rx="4" fill="#c2410c"/><text x="532.4" y="111.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 68,377</text><text x="349.0" y="161.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">79321 | CHILLI LIGHTS</text><rect x="365" y="138" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="138" width="164.8" height="34" rx="4" fill="#c2410c"/><text x="541.8" y="161.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 72,528</text><text x="349.0" y="211.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">22086 | PAPER CHAIN KIT 50&#x27;S CHRISTMAS</text><rect x="365" y="188" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="188" width="180.6" height="34" rx="4" fill="#c2410c"/><text x="557.6" y="211.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 79,456</text><text x="349.0" y="261.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">23166 | MEDIUM CERAMIC TOP STORAGE JAR</text><rect x="365" y="238" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="238" width="185.0" height="34" rx="4" fill="#c2410c"/><text x="562.0" y="261.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 81,417</text><text x="349.0" y="311.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">47566 | PARTY BUNTING</text><rect x="365" y="288" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="288" width="235.9" height="34" rx="4" fill="#c2410c"/><text x="612.9" y="311.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 103,803</text><text x="349.0" y="361.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">84879 | ASSORTED COLOUR BIRD ORNAMENT</text><rect x="365" y="338" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="338" width="288.0" height="34" rx="4" fill="#c2410c"/><text x="665.0" y="361.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 126,704</text><text x="349.0" y="411.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">23843 | PAPER CRAFT , LITTLE BIRDIE</text><rect x="365" y="388" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="388" width="382.9" height="34" rx="4" fill="#c2410c"/><text x="759.9" y="411.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 168,470</text><text x="349.0" y="461.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">85099B | RED RETROSPOT JUMBO BAG</text><rect x="365" y="438" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="438" width="387.1" height="34" rx="4" fill="#c2410c"/><text x="764.1" y="461.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 170,298</text><text x="349.0" y="511.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">85123A | WHITE HANGING HEART T-LIGHT HOLDER</text><rect x="365" y="488" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="488" width="572.5" height="34" rx="4" fill="#c2410c"/><text x="949.5" y="511.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 251,887</text><text x="349.0" y="561.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">22423 | REGENCY CAKESTAND 3 TIER</text><rect x="365" y="538" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="538" width="650.0" height="34" rx="4" fill="#c2410c"/><text x="1027.0" y="561.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 285,992</text></g>
+</svg>
+
+      </section>
+      <section class="chart-panel">
+        <h2>Top Products by Units Sold</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="chart-title chart-description">
+  <title id="chart-title">Top 10 merchandise products by units sold</title>
+  <desc id="chart-description">Horizontal bar chart for Top 10 merchandise products by units sold.</desc>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif"><text x="55.0" y="45.0" font-size="20px" text-anchor="start" font-weight="500" fill="#17202a">Top 10 merchandise products by units sold</text><text x="349.0" y="111.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">21977 | PACK OF 60 PINK PAISLEY CAKE CASES</text><rect x="365" y="88" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="88" width="328.8" height="34" rx="4" fill="#2563eb"/><text x="705.8" y="111.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">55,101 units</text><text x="349.0" y="161.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">17003 | BROCADE RING PURSE</text><rect x="365" y="138" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="138" width="424.2" height="34" rx="4" fill="#2563eb"/><text x="801.2" y="161.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">71,093 units</text><text x="349.0" y="211.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">23166 | MEDIUM CERAMIC TOP STORAGE JAR</text><rect x="365" y="188" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="188" width="464.9" height="34" rx="4" fill="#2563eb"/><text x="841.9" y="211.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">77,916 units</text><text x="349.0" y="261.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">22197 | SMALL POPCORN HOLDER</text><rect x="365" y="238" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="238" width="465.0" height="34" rx="4" fill="#2563eb"/><text x="842.0" y="261.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">77,933 units</text><text x="349.0" y="311.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">84879 | ASSORTED COLOUR BIRD ORNAMENT</text><rect x="365" y="288" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="288" width="475.5" height="34" rx="4" fill="#2563eb"/><text x="852.5" y="311.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">79,694 units</text><text x="349.0" y="361.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">23843 | PAPER CRAFT , LITTLE BIRDIE</text><rect x="365" y="338" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="338" width="483.3" height="34" rx="4" fill="#2563eb"/><text x="860.3" y="361.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">80,995 units</text><text x="349.0" y="411.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">21212 | PACK OF 72 RETROSPOT CAKE CASES</text><rect x="365" y="388" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="388" width="544.1" height="34" rx="4" fill="#2563eb"/><text x="921.1" y="411.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">91,175 units</text><text x="349.0" y="461.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">85123A | WHITE HANGING HEART T-LIGHT HOLDER</text><rect x="365" y="438" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="438" width="558.4" height="34" rx="4" fill="#2563eb"/><text x="935.4" y="461.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">93,577 units</text><text x="349.0" y="511.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">85099B | RED RETROSPOT JUMBO BAG</text><rect x="365" y="488" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="488" width="565.7" height="34" rx="4" fill="#2563eb"/><text x="942.7" y="511.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">94,809 units</text><text x="349.0" y="561.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">84077 | WORLD WAR 2 GLIDERS ASSTD DESIGNS</text><rect x="365" y="538" width="650" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="538" width="650.0" height="34" rx="4" fill="#2563eb"/><text x="1027.0" y="561.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">108,929 units</text></g>
+</svg>
+
+      </section>
+    </div>
+
+    <div class="visual-grid">
+      <section class="chart-panel">
+        <h2>Slow-Moving Product Candidates</h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="chart-title chart-description">
+  <title id="chart-title">Slow-moving product candidates</title>
+  <desc id="chart-description">Products with at least GBP 5k historical revenue and at least 180 days since last sale.</desc>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g font-family="Arial, Helvetica, sans-serif"><text x="55.0" y="45.0" font-size="20px" text-anchor="start" font-weight="500" fill="#17202a">Slow-moving product candidates: historical value but no sale for 180+ days</text><text x="349.0" y="111.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">22198 | POPCORN HOLDER , LARGE</text><rect x="365" y="88" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="88" width="289.0" height="34" rx="4" fill="#7c3aed"/><text x="666.0" y="111.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 11,177 | 292 days</text><text x="349.0" y="161.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">22444 | GROW YOUR OWN PLANT IN A CAN</text><rect x="365" y="138" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="138" width="291.1" height="34" rx="4" fill="#7c3aed"/><text x="668.1" y="161.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 11,258 | 241 days</text><text x="349.0" y="211.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">85042 | ANTIQUE LILY FAIRY LIGHTS</text><rect x="365" y="188" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="188" width="312.4" height="34" rx="4" fill="#7c3aed"/><text x="689.4" y="211.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 12,081 | 389 days</text><text x="349.0" y="261.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">79323P | PINK CHERRY LIGHTS</text><rect x="365" y="238" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="238" width="341.3" height="34" rx="4" fill="#7c3aed"/><text x="718.3" y="261.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 13,198 | 333 days</text><text x="349.0" y="311.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">47556B | TEA TIME TEA TOWELS</text><rect x="365" y="288" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="288" width="345.5" height="34" rx="4" fill="#7c3aed"/><text x="722.5" y="311.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 13,363 | 236 days</text><text x="349.0" y="361.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">85232B | SET/3 RUSSIAN DOLL STACKING TINS</text><rect x="365" y="338" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="338" width="362.5" height="34" rx="4" fill="#7c3aed"/><text x="739.5" y="361.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 14,019 | 302 days</text><text x="349.0" y="411.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">35004C | SET OF 3 COLOURED  FLYING DUCKS</text><rect x="365" y="388" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="388" width="380.9" height="34" rx="4" fill="#7c3aed"/><text x="757.9" y="411.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 14,730 | 278 days</text><text x="349.0" y="461.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">79323W | WHITE CHERRY LIGHTS</text><rect x="365" y="438" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="438" width="449.5" height="34" rx="4" fill="#7c3aed"/><text x="826.5" y="461.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 17,385 | 450 days</text><text x="349.0" y="511.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">21527 | RETRO SPOT TRADITIONAL TEAPOT</text><rect x="365" y="488" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="488" width="609.4" height="34" rx="4" fill="#7c3aed"/><text x="986.4" y="511.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 23,566 | 209 days</text><text x="349.0" y="561.0" font-size="12px" text-anchor="end" font-weight="400" fill="#17202a">37503 | TEA TIME CAKE STAND IN GIFT BOX</text><rect x="365" y="538" width="615" height="34" rx="4" fill="#eef2f7"/><rect x="365" y="538" width="615.0" height="34" rx="4" fill="#7c3aed"/><text x="992.0" y="561.0" font-size="12px" text-anchor="start" font-weight="400" fill="#17202a">GBP 23,785 | 496 days</text></g>
+</svg>
+
+      </section>
+      <section>
+        <h2>Product Actions</h2>
+        <div class="action-grid">
+          <div class="action-card accent-blue"><h3>Protect availability</h3><p>Start with high-revenue products that appear across many orders and customers.</p></div>
+          <div class="action-card accent-green"><h3>Build baskets</h3><p>Use high-unit lower-revenue products as add-ons, bundles or merchandising support.</p></div>
+          <div class="action-card accent-red"><h3>Review inactive items</h3><p>Check stockout, seasonality or discontinuation before discounting or delisting.</p></div>
+          <div class="action-card accent-purple"><h3>Plan core products</h3><p>Use the forecast as a planning baseline for stable products, not as an automated buying decision.</p></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="csv-note">Detailed tables are kept in the generated CSV files in <strong>outputs/</strong>. This dashboard is intentionally visual-first.</div>
+  </main>
+</body>
+</html>

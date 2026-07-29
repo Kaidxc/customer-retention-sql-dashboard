@@ -14,7 +14,7 @@ This script rebuilds the complete product sales and demand analysis from the loc
 4. Writes dashboard-ready product CSV files to `../outputs`.
 5. Generates product-focused SVG charts in `../documentation/figures`.
 6. Generates `../outputs/executive_summary.md`.
-7. Generates `../dashboard/customer_retention_dashboard.html`.
+7. Generates `../dashboard/product_sales_dashboard.html`.
 
 ## Run command
 
