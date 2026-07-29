@@ -1535,7 +1535,7 @@ def inline_svg(filename: str) -> str:
     return (FIGURES_DIR / filename).read_text(encoding="utf-8")
 
 
-def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, object]) -> None:
+def generate_static_dashboard_legacy(outputs: dict[str, pd.DataFrame], summary: dict[str, object]) -> None:
     DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
     html_doc = f"""<!doctype html>
 <html lang="en">
@@ -1755,6 +1755,717 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
 </body>
 </html>
 """
+    (DASHBOARD_DIR / "product_sales_dashboard.html").write_text(
+        html_doc, encoding="utf-8"
+    )
+
+
+def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, object]) -> None:
+    """Create a self-contained interactive dashboard for business review."""
+    DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
+
+    merchandise = outputs["product_performance.csv"]
+    merchandise = merchandise[merchandise["stock_line_type"] == "merchandise"].copy()
+    forecast = outputs["product_next_quarter_forecast.csv"].copy()
+    backtest = outputs["product_forecast_backtest.csv"].copy()
+    slow = outputs["slow_moving_product_candidates.csv"].copy()
+    countries = outputs["country_sales_context.csv"].copy()
+    quality = outputs["data_quality_checks.csv"].copy()
+
+    forecast_codes = set(forecast["stock_code"].astype(str))
+    slow_codes = set(slow["stock_code"].astype(str))
+    forecast_lookup = forecast.set_index("stock_code").to_dict("index")
+    backtest_lookup = backtest.set_index("stock_code").to_dict("index")
+
+    def product_action(row: pd.Series) -> tuple[str, str]:
+        stock_code = str(row["stock_code"])
+        revenue_rank = int(row["revenue_rank"])
+        quantity_rank = int(row["quantity_rank"])
+        order_count = int(row["order_count"])
+        customer_count = int(row["customer_count"])
+
+        if stock_code in slow_codes:
+            return (
+                "Review",
+                "Historical value exists, but recent sales are weak. Check stockout, seasonality or discontinuation before discounting or delisting.",
+            )
+        if stock_code in forecast_codes:
+            return (
+                "Forecast",
+                "Stable high-revenue product. Use the forecast baseline together with backtest error before stock planning.",
+            )
+        if revenue_rank <= 25 and customer_count >= 300:
+            return (
+                "Protect",
+                "High commercial value with broad reach. Start with availability and supplier review.",
+            )
+        if quantity_rank <= 25 and order_count >= 300:
+            return (
+                "Bundle",
+                "High unit volume. Consider basket-building, add-on or bundle use.",
+            )
+        return (
+            "Monitor",
+            "Keep in catalogue monitoring and manage with product lifecycle rules.",
+        )
+
+    selected_products = pd.concat(
+        [
+            merchandise.sort_values("total_revenue", ascending=False).head(80),
+            merchandise.sort_values("total_quantity", ascending=False).head(80),
+            merchandise[merchandise["stock_code"].astype(str).isin(slow_codes)],
+            merchandise[merchandise["stock_code"].astype(str).isin(forecast_codes)],
+        ],
+        ignore_index=True,
+    ).drop_duplicates("stock_code")
+
+    product_rows: list[dict[str, object]] = []
+    for row in selected_products.itertuples(index=False):
+        row_dict = row._asdict()
+        stock_code = str(row_dict["stock_code"])
+        action, recommendation = product_action(pd.Series(row_dict))
+        forecast_row = forecast_lookup.get(stock_code, {})
+        backtest_row = backtest_lookup.get(stock_code, {})
+        product_rows.append(
+            {
+                "stock_code": stock_code,
+                "product_description": str(row_dict["product_description"]),
+                "total_quantity": int(row_dict["total_quantity"]),
+                "total_revenue": round(float(row_dict["total_revenue"]), 2),
+                "order_count": int(row_dict["order_count"]),
+                "customer_count": int(row_dict["customer_count"]),
+                "average_selling_price": round(float(row_dict["average_selling_price"]), 2),
+                "active_months": int(row_dict["active_months"]),
+                "last_sale_date": str(row_dict["last_sale_date"]),
+                "quantity_rank": int(row_dict["quantity_rank"]),
+                "revenue_rank": int(row_dict["revenue_rank"]),
+                "action": action,
+                "recommendation": recommendation,
+                "forecast_revenue": round(float(forecast_row.get("forecast_revenue", 0)), 2),
+                "forecast_quantity": round(float(forecast_row.get("forecast_quantity", 0)), 0),
+                "revenue_mape": round(float(backtest_row.get("revenue_mape", 0)), 4),
+                "revenue_mae": round(float(backtest_row.get("revenue_mae", 0)), 2),
+                "validation_quarters": int(backtest_row.get("validation_quarters", 0)),
+            }
+        )
+
+    payload = {
+        "summary": summary,
+        "products": product_rows,
+        "countries": json.loads(countries.to_json(orient="records")),
+        "quality": json.loads(quality.to_json(orient="records")),
+    }
+    payload_json = json.dumps(payload).replace("</", "<\\/")
+
+    html_doc = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Online Retail BI and Product Planning Dashboard</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #5b6675;
+      --line: #d9dee7;
+      --blue: #2563eb;
+      --green: #0f766e;
+      --red: #c2410c;
+      --purple: #7c3aed;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --soft: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    header {
+      padding: 28px 38px 24px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+    h2 {
+      font-size: 18px;
+      margin: 0;
+    }
+    h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+    p {
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+    button, input, select { font: inherit; }
+    main {
+      padding: 24px 36px 40px;
+      display: grid;
+      gap: 22px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 14px;
+    }
+    .kpi, section, .panel, .story-card, .action-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .kpi-title {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .kpi-note {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    .grid-2, .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+    .story-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(130px, 0.8fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    label {
+      color: var(--muted);
+      display: grid;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    input, select {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      min-height: 38px;
+      padding: 8px 10px;
+      width: 100%;
+    }
+    .section-title {
+      align-items: baseline;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .section-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .bar-list {
+      display: grid;
+      gap: 10px;
+    }
+    .bar-row {
+      align-items: center;
+      background: #fbfcff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      cursor: pointer;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: minmax(220px, 1.1fr) minmax(220px, 2fr) minmax(110px, 0.5fr);
+      padding: 10px 12px;
+      text-align: left;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+      width: 100%;
+    }
+    .bar-row:hover, .bar-row.selected {
+      border-color: var(--blue);
+      transform: translateY(-1px);
+    }
+    .bar-track {
+      background: var(--soft);
+      border-radius: 999px;
+      height: 18px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      background: var(--blue);
+      border-radius: 999px;
+      height: 100%;
+      min-width: 2px;
+    }
+    .bar-value {
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .product-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .product-meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .tag {
+      border-radius: 999px;
+      color: #ffffff;
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 7px;
+      padding: 4px 8px;
+    }
+    .tag-Protect { background: var(--blue); }
+    .tag-Bundle { background: var(--green); }
+    .tag-Review { background: var(--red); }
+    .tag-Forecast { background: var(--purple); }
+    .tag-Monitor { background: #64748b; }
+    .metric-grid, .quality-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .metric, .compare-card, .quality-item {
+      background: #fbfcff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .metric .label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .metric .value {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+    .recommendation {
+      background: #f8fafc;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      margin-top: 12px;
+      padding: 12px;
+    }
+    .quality-item { border-left: 4px solid var(--green); }
+    .accent-blue { border-top: 4px solid var(--blue); }
+    .accent-green { border-top: 4px solid var(--green); }
+    .accent-purple { border-top: 4px solid var(--purple); }
+    .csv-note {
+      border: 1px dashed var(--line);
+      background: #fbfcff;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 14px 16px;
+    }
+    @media (max-width: 1000px) {
+      .kpi-grid, .grid-2, .story-grid, .toolbar, .compare-grid, .metric-grid, .quality-grid {
+        grid-template-columns: 1fr;
+      }
+      .bar-row {
+        grid-template-columns: 1fr;
+      }
+      .bar-value {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Online Retail BI and Product Planning Dashboard</h1>
+    <p>Business question: which products should the retailer protect, promote, review or forecast, based on historical sales evidence?</p>
+  </header>
+  <main>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-title">Revenue Analysed</div><div class="kpi-value" id="kpiRevenue"></div><div class="kpi-note">2009-12 to 2011-12</div></div>
+      <div class="kpi"><div class="kpi-title">Merchandise Products</div><div class="kpi-value" id="kpiProducts"></div><div class="kpi-note">after cleaning</div></div>
+      <div class="kpi"><div class="kpi-title">Completed Orders</div><div class="kpi-value" id="kpiOrders"></div><div class="kpi-note">prepared transactions</div></div>
+      <div class="kpi"><div class="kpi-title">Top 500 Share</div><div class="kpi-value" id="kpiTop500"></div><div class="kpi-note">of merchandise revenue</div></div>
+      <div class="kpi"><div class="kpi-title">Forecast Error</div><div class="kpi-value" id="kpiMape"></div><div class="kpi-note">median revenue MAPE</div></div>
+    </div>
+
+    <div class="story-grid">
+      <div class="story-card accent-blue"><h3>Main finding</h3><p id="findingCore"></p></div>
+      <div class="story-card accent-green"><h3>Business implication</h3><p>Product decisions should separate revenue drivers, high-volume basket builders, slow-moving review items and forecastable core products.</p></div>
+      <div class="story-card accent-purple"><h3>Recommendation</h3><p>Start with stock protection for broad-reach revenue leaders, use high-unit products for bundles, review inactive products, and validate forecasts before planning stock.</p></div>
+    </div>
+
+    <section>
+      <div class="section-title">
+        <h2>Product Explorer</h2>
+        <span id="productCount"></span>
+      </div>
+      <div class="toolbar">
+        <label>Search product
+          <input id="searchInput" type="search" placeholder="Stock code or product name">
+        </label>
+        <label>Action group
+          <select id="actionFilter">
+            <option value="All">All products</option>
+            <option value="Protect">Protect</option>
+            <option value="Bundle">Bundle</option>
+            <option value="Review">Review</option>
+            <option value="Forecast">Forecast</option>
+            <option value="Monitor">Monitor</option>
+          </select>
+        </label>
+        <label>Rank by
+          <select id="rankMetric">
+            <option value="total_revenue">Revenue</option>
+            <option value="total_quantity">Units sold</option>
+            <option value="customer_count">Customer reach</option>
+            <option value="order_count">Order reach</option>
+          </select>
+        </label>
+        <label>Show
+          <select id="topN">
+            <option value="10">Top 10</option>
+            <option value="20" selected>Top 20</option>
+            <option value="40">Top 40</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid-2">
+        <div class="panel"><div class="bar-list" id="productChart"></div></div>
+        <div class="panel" id="productDetail"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>Product Comparison</h2>
+        <span>Compare value, volume, reach and planning action</span>
+      </div>
+      <div class="toolbar">
+        <label>Product A
+          <select id="compareA"></select>
+        </label>
+        <label>Product B
+          <select id="compareB"></select>
+        </label>
+        <label>Comparison metric
+          <select id="compareMetric">
+            <option value="total_revenue">Revenue</option>
+            <option value="total_quantity">Units sold</option>
+            <option value="customer_count">Customer reach</option>
+            <option value="order_count">Order reach</option>
+          </select>
+        </label>
+      </div>
+      <div id="comparePanel" class="compare-grid"></div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>Forecast and Validation</h2>
+        <span>Planning baseline with backtest evidence</span>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <label>Forecast product
+            <select id="forecastSelect"></select>
+          </label>
+          <div id="forecastDetail"></div>
+        </div>
+        <div class="panel">
+          <h3>Validation ranking</h3>
+          <div class="bar-list" id="validationChart"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>Geographic Sales Context</h2>
+        <span>Country/region level view</span>
+      </div>
+      <div class="toolbar">
+        <label>Market group
+          <select id="marketFilter">
+            <option value="All">All</option>
+            <option value="Domestic">Domestic</option>
+            <option value="International">International</option>
+          </select>
+        </label>
+      </div>
+      <div class="bar-list" id="countryChart"></div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>Data Quality Status</h2>
+        <span>Six quality dimensions checked before analysis</span>
+      </div>
+      <div class="quality-grid" id="qualityPanel"></div>
+    </section>
+
+    <div class="csv-note">Detailed records are kept in the generated CSV files in <strong>outputs/</strong>. This HTML dashboard is interactive and self-contained.</div>
+  </main>
+
+  <script id="dashboard-data" type="application/json">__DASHBOARD_DATA__</script>
+  <script>
+    const payload = JSON.parse(document.getElementById("dashboard-data").textContent);
+    const summary = payload.summary;
+    const products = payload.products;
+    const countries = payload.countries;
+    const quality = payload.quality;
+    let selectedProduct = products.find((p) => p.action === "Protect") || products[0];
+
+    const escapeMap = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    };
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => escapeMap[char]);
+    const money = (value) => `GBP ${Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    const number = (value) => Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const pct = (value) => `${(Number(value || 0) * 100).toFixed(1)}%`;
+    const rawProductLabel = (p) => `${p.stock_code} | ${p.product_description}`;
+    const productLabel = (p) => esc(rawProductLabel(p));
+    const maxFor = (rows, field) => Math.max(...rows.map((row) => Number(row[field] || 0)), 1);
+    const actionTag = (action) => `<span class="tag tag-${esc(action)}">${esc(action)}</span>`;
+    const metric = (label, value) => `<div class="metric"><div class="label">${esc(label)}</div><div class="value">${esc(value)}</div></div>`;
+
+    function renderKpis() {
+      document.getElementById("kpiRevenue").textContent = money(summary.total_revenue);
+      document.getElementById("kpiProducts").textContent = number(summary.merchandise_products);
+      document.getElementById("kpiOrders").textContent = number(summary.distinct_orders);
+      document.getElementById("kpiTop500").textContent = pct(summary.top_500_revenue_share);
+      document.getElementById("kpiMape").textContent = pct(summary.forecast_median_revenue_mape);
+      document.getElementById("findingCore").textContent =
+        `The catalogue has ${number(summary.merchandise_products)} merchandise products, but the top 500 generate ${pct(summary.top_500_revenue_share)} of merchandise revenue.`;
+    }
+
+    function filteredProducts() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const action = document.getElementById("actionFilter").value;
+      const metricName = document.getElementById("rankMetric").value;
+      const topN = Number(document.getElementById("topN").value);
+      return products
+        .filter((p) => action === "All" || p.action === action)
+        .filter((p) => !query || rawProductLabel(p).toLowerCase().includes(query))
+        .sort((a, b) => Number(b[metricName]) - Number(a[metricName]))
+        .slice(0, topN);
+    }
+
+    function renderProductChart() {
+      const rows = filteredProducts();
+      const metricName = document.getElementById("rankMetric").value;
+      const maxValue = maxFor(rows, metricName);
+      document.getElementById("productCount").textContent = `${rows.length} products shown`;
+      document.getElementById("productChart").innerHTML = rows.map((p) => {
+        const width = Math.max(2, (Number(p[metricName]) / maxValue) * 100);
+        const value = metricName === "total_revenue" ? money(p[metricName]) : number(p[metricName]);
+        const selectedClass = p.stock_code === selectedProduct.stock_code ? " selected" : "";
+        return `
+          <button class="bar-row${selectedClass}" data-stock="${esc(p.stock_code)}">
+            <div>
+              <div class="product-name">${productLabel(p)}</div>
+              <div class="product-meta">Revenue rank ${number(p.revenue_rank)} | Unit rank ${number(p.quantity_rank)}</div>
+              ${actionTag(p.action)}
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+            <div class="bar-value">${esc(value)}</div>
+          </button>
+        `;
+      }).join("");
+      document.querySelectorAll(".bar-row[data-stock]").forEach((row) => {
+        row.addEventListener("click", () => {
+          selectedProduct = products.find((p) => p.stock_code === row.dataset.stock) || selectedProduct;
+          renderProductChart();
+          renderProductDetail();
+        });
+      });
+    }
+
+    function renderProductDetail() {
+      const p = selectedProduct;
+      document.getElementById("productDetail").innerHTML = `
+        <h3>${productLabel(p)}</h3>
+        ${actionTag(p.action)}
+        <div class="metric-grid">
+          ${metric("Revenue", money(p.total_revenue))}
+          ${metric("Units", number(p.total_quantity))}
+          ${metric("Orders", number(p.order_count))}
+          ${metric("Customers", number(p.customer_count))}
+          ${metric("Active months", number(p.active_months))}
+          ${metric("Average price", money(p.average_selling_price))}
+        </div>
+        <div class="recommendation"><strong>Recommended action:</strong><p>${esc(p.recommendation)}</p></div>
+        <div class="recommendation"><strong>Drill-down evidence:</strong><p>Last sale date: ${esc(p.last_sale_date)}. Revenue rank: ${number(p.revenue_rank)}. Unit rank: ${number(p.quantity_rank)}. Customer reach: ${number(p.customer_count)} known customers.</p></div>
+      `;
+    }
+
+    function fillProductSelect(selectId, rows) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = rows.map((p) => `<option value="${esc(p.stock_code)}">${productLabel(p)}</option>`).join("");
+    }
+
+    function renderCompare() {
+      const metricName = document.getElementById("compareMetric").value;
+      const selected = [
+        products.find((p) => p.stock_code === document.getElementById("compareA").value),
+        products.find((p) => p.stock_code === document.getElementById("compareB").value),
+      ].filter(Boolean);
+      const maxValue = maxFor(selected, metricName);
+      document.getElementById("comparePanel").innerHTML = selected.map((p) => {
+        const value = metricName === "total_revenue" ? money(p[metricName]) : number(p[metricName]);
+        const width = Math.max(2, (Number(p[metricName]) / maxValue) * 100);
+        return `
+          <div class="compare-card">
+            <h3>${productLabel(p)}</h3>
+            ${actionTag(p.action)}
+            <div class="metric-grid">
+              ${metric("Revenue", money(p.total_revenue))}
+              ${metric("Units", number(p.total_quantity))}
+              ${metric("Customers", number(p.customer_count))}
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+            <div class="product-meta">${esc(value)} on selected comparison metric</div>
+            <div class="recommendation"><p>${esc(p.recommendation)}</p></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderForecast() {
+      const forecastProducts = products.filter((p) => p.forecast_revenue > 0);
+      const selected = forecastProducts.find((p) => p.stock_code === document.getElementById("forecastSelect").value) || forecastProducts[0];
+      const reliability =
+        selected.revenue_mape <= 0.25 ? "Lower historical error: stronger candidate for baseline planning." :
+        selected.revenue_mape <= 0.6 ? "Moderate historical error: use the baseline with timing and stock review." :
+        "High historical error: review seasonality, one-off demand or discontinuation before planning.";
+      document.getElementById("forecastDetail").innerHTML = `
+        <h3>${productLabel(selected)}</h3>
+        <div class="metric-grid">
+          ${metric("Forecast revenue", money(selected.forecast_revenue))}
+          ${metric("Forecast units", number(selected.forecast_quantity))}
+          ${metric("Revenue MAPE", pct(selected.revenue_mape))}
+          ${metric("Revenue MAE", money(selected.revenue_mae))}
+          ${metric("Validation quarters", number(selected.validation_quarters))}
+          ${metric("Action", selected.action)}
+        </div>
+        <div class="recommendation"><strong>Validation reading:</strong><p>${esc(reliability)}</p></div>
+      `;
+    }
+
+    function renderValidationChart() {
+      const rows = products.filter((p) => p.revenue_mape > 0).sort((a, b) => a.revenue_mape - b.revenue_mape).slice(0, 10);
+      const maxValue = maxFor(rows, "revenue_mape");
+      document.getElementById("validationChart").innerHTML = rows.map((p) => {
+        const width = Math.max(2, (Number(p.revenue_mape) / maxValue) * 100);
+        return `
+          <button class="bar-row" data-forecast-stock="${esc(p.stock_code)}">
+            <div>
+              <div class="product-name">${productLabel(p)}</div>
+              <div class="product-meta">Lower MAPE means the baseline was more stable historically</div>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+            <div class="bar-value">${pct(p.revenue_mape)}</div>
+          </button>
+        `;
+      }).join("");
+      document.querySelectorAll("[data-forecast-stock]").forEach((row) => {
+        row.addEventListener("click", () => {
+          document.getElementById("forecastSelect").value = row.dataset.forecastStock;
+          renderForecast();
+        });
+      });
+    }
+
+    function renderCountries() {
+      const market = document.getElementById("marketFilter").value;
+      const rows = countries
+        .filter((country) => market === "All" || country.market_group === market)
+        .sort((a, b) => Number(b.revenue) - Number(a.revenue))
+        .slice(0, 12);
+      const maxValue = maxFor(rows, "revenue");
+      document.getElementById("countryChart").innerHTML = rows.map((country) => {
+        const width = Math.max(2, (Number(country.revenue) / maxValue) * 100);
+        return `
+          <div class="bar-row">
+            <div>
+              <div class="product-name">${esc(country.country)}</div>
+              <div class="product-meta">${esc(country.market_group)} | ${number(country.order_count)} orders | ${number(country.customer_count)} customers</div>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+            <div class="bar-value">${money(country.revenue)} | ${pct(country.revenue_share)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderQuality() {
+      document.getElementById("qualityPanel").innerHTML = quality.map((item) => `
+        <div class="quality-item">
+          <h3>${esc(item.dimension)}</h3>
+          <p>${esc(item.check_name)}</p>
+          <div class="product-meta">Status: ${esc(item.status)} | Affected rows: ${number(item.affected_rows)}</div>
+        </div>
+      `).join("");
+    }
+
+    function init() {
+      renderKpis();
+      fillProductSelect("compareA", products.slice().sort((a, b) => b.total_revenue - a.total_revenue).slice(0, 40));
+      fillProductSelect("compareB", products.slice().sort((a, b) => b.total_quantity - a.total_quantity).slice(0, 40));
+      document.getElementById("compareB").selectedIndex = 1;
+      fillProductSelect("forecastSelect", products.filter((p) => p.forecast_revenue > 0));
+      ["searchInput", "actionFilter", "rankMetric", "topN"].forEach((id) => {
+        document.getElementById(id).addEventListener("input", renderProductChart);
+        document.getElementById(id).addEventListener("change", renderProductChart);
+      });
+      ["compareA", "compareB", "compareMetric"].forEach((id) => {
+        document.getElementById(id).addEventListener("change", renderCompare);
+      });
+      document.getElementById("forecastSelect").addEventListener("change", renderForecast);
+      document.getElementById("marketFilter").addEventListener("change", renderCountries);
+      renderProductChart();
+      renderProductDetail();
+      renderCompare();
+      renderForecast();
+      renderValidationChart();
+      renderCountries();
+      renderQuality();
+    }
+    init();
+  </script>
+</body>
+</html>
+""".replace("__DASHBOARD_DATA__", payload_json)
+
     (DASHBOARD_DIR / "product_sales_dashboard.html").write_text(
         html_doc, encoding="utf-8"
     )

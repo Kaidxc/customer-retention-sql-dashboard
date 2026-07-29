@@ -56,11 +56,24 @@ class GeneratedOutputTests(unittest.TestCase):
         self.assertTrue((backtest["validation_quarters"] > 0).all())
         self.assertTrue(backtest["revenue_mape"].map(math.isfinite).all())
 
-    def test_dashboard_is_visual_first(self) -> None:
+    def test_dashboard_is_interactive_and_business_facing(self) -> None:
         dashboard = DASHBOARD_PATH.read_text(encoding="utf-8").lower()
-        self.assertIn("<svg", dashboard)
-        self.assertIn("forecast backtest", dashboard)
+        self.assertIn("business question", dashboard)
+        self.assertIn("main finding", dashboard)
+        self.assertIn("recommendation", dashboard)
+        self.assertIn("product explorer", dashboard)
+        self.assertIn("product comparison", dashboard)
+        self.assertIn("forecast and validation", dashboard)
         self.assertIn("geographic sales context", dashboard)
+        self.assertIn('id="searchinput"', dashboard)
+        self.assertIn('id="actionfilter"', dashboard)
+        self.assertIn('id="comparea"', dashboard)
+        self.assertIn('id="forecastselect"', dashboard)
+        self.assertIn('id="marketfilter"', dashboard)
+        self.assertIn('id="dashboard-data"', dashboard)
+        self.assertIn("renderproductdetail", dashboard)
+        self.assertIn("rendervalidationchart", dashboard)
+        self.assertIn("bar-fill", dashboard)
         self.assertNotIn("<table", dashboard)
 
 
