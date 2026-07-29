@@ -12,5 +12,12 @@
   "campaign_target_count": 300,
   "latest_month": "2011-12-01",
   "latest_month_revenue": 517208.44,
-  "average_month_1_to_3_retention": 0.2156159420289855
+  "average_month_1_to_3_retention": 0.2156159420289855,
+  "data_quality_checks_passed": 6,
+  "data_quality_checks_total": 6,
+  "data_quality_review_items": 0,
+  "next_forecast_month": "2012-01-01",
+  "next_month_revenue_forecast": 903018.8333,
+  "next_month_repeat_purchase_rate_forecast": 0.2446,
+  "forecast_method": "3-month moving average baseline"
 }

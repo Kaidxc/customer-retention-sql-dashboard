@@ -1,0 +1,7 @@
+dimension,check_name,check_description,affected_rows,affected_share,status
+Accuracy,Line value matches quantity times price,Rows where line_value differs materially from quantity * unit_price.,0,0.0,Pass
+Validity,Transaction values are usable,"Rows with non-positive quantity, non-positive unit price or negative line value.",0,0.0,Pass
+Timeliness,No transactions after the analysis date,Rows dated after the analysis date used for recency calculations.,0,0.0,Pass
+Completeness,Required fields are populated,"Rows missing invoice, customer, date, quantity, price, value or country.",0,0.0,Pass
+Consistency,Invoices map to one customer,Invoices linked to more than one customer ID.,0,0.0,Pass
+Uniqueness,No exact duplicate transaction lines,Additional rows created by exact duplicate transaction-line records.,0,0.0,Pass

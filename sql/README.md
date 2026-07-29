@@ -13,6 +13,8 @@ The SQL files define the repeatable analytical logic for the project. The build 
 | `03_cohort_retention.sql` | `outputs/cohort_retention.csv` | Monthly cohort retention matrix input |
 | `04_campaign_targets.sql` | `outputs/campaign_targets.csv` | Prioritised CRM retention target list |
 | `05_monthly_kpis.sql` | `outputs/monthly_kpis.csv` | Monthly dashboard KPI trend |
+| `06_repeat_customer_summary.sql` | `outputs/repeat_customer_summary.csv` | Repeat-customer extract demonstrating `WHERE` and `HAVING` in context |
+| `07_data_quality_checks.sql` | `outputs/data_quality_checks.csv` | Quality checks across accuracy, validity, timeliness, completeness, consistency and uniqueness |
 
 ## SQL dialect
 

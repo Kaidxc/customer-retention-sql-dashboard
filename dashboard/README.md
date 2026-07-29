@@ -12,8 +12,9 @@ It contains:
 - Top campaign target list.
 - Cohort retention heatmap.
 - Business recommendation.
+- The repository homepage also includes a static forecast visual generated from the monthly KPI output.
 
-The repository homepage also includes static PNG versions of the key visuals so that the business story is visible directly on GitHub without opening the HTML file.
+The repository homepage includes static SVG versions of the key visuals so that the business story is visible directly on GitHub without opening the HTML file.
 
 ## Power BI version
 

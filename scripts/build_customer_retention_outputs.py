@@ -32,6 +32,7 @@ QUERY_OUTPUTS = {
     "04_campaign_targets.sql": "campaign_targets.csv",
     "05_monthly_kpis.sql": "monthly_kpis.csv",
     "06_repeat_customer_summary.sql": "repeat_customer_summary.csv",
+    "07_data_quality_checks.sql": "data_quality_checks.csv",
 }
 
 
@@ -81,6 +82,72 @@ def run_sql_outputs(conn: sqlite3.Connection) -> dict[str, pd.DataFrame]:
     return outputs
 
 
+def generate_monthly_forecast(outputs: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    monthly = outputs["monthly_kpis.csv"].sort_values("transaction_month").reset_index(drop=True)
+    forecast_rows: list[dict[str, object]] = []
+    window = 3
+    horizon = 3
+
+    metric_specs = [
+        ("monthly_revenue", "revenue", "GBP", None),
+        ("monthly_repeat_purchase_rate", "repeat_purchase_rate", "share", 1.0),
+    ]
+
+    for metric_name, source_column, unit, upper_cap in metric_specs:
+        values = monthly[source_column].astype(float).reset_index(drop=True)
+        months = pd.to_datetime(monthly["transaction_month"]).reset_index(drop=True)
+        backtest_errors: list[float] = []
+        backtest_pct_errors: list[float] = []
+
+        for index in range(window, len(values)):
+            prediction = float(values.iloc[index - window:index].mean())
+            actual = float(values.iloc[index])
+            error = actual - prediction
+            backtest_errors.append(abs(error))
+            if actual != 0:
+                backtest_pct_errors.append(abs(error) / abs(actual))
+
+        mae = float(sum(backtest_errors) / len(backtest_errors)) if backtest_errors else 0.0
+        mape = (
+            float(sum(backtest_pct_errors) / len(backtest_pct_errors))
+            if backtest_pct_errors
+            else 0.0
+        )
+
+        rolling_values = values.iloc[-window:].astype(float).tolist()
+        last_month = months.iloc[-1]
+
+        for step in range(1, horizon + 1):
+            forecast_value = float(sum(rolling_values[-window:]) / window)
+            lower_value = max(0.0, forecast_value - mae)
+            upper_value = forecast_value + mae
+            if upper_cap is not None:
+                upper_value = min(upper_cap, upper_value)
+
+            forecast_rows.append(
+                {
+                    "metric": metric_name,
+                    "forecast_month": (last_month + pd.DateOffset(months=step)).strftime(
+                        "%Y-%m-01"
+                    ),
+                    "method": "3-month moving average baseline",
+                    "forecast_value": round(forecast_value, 4),
+                    "lower_practical_band": round(lower_value, 4),
+                    "upper_practical_band": round(upper_value, 4),
+                    "validation_mae": round(mae, 4),
+                    "validation_mape": round(mape, 4),
+                    "validation_periods": len(backtest_errors),
+                    "unit": unit,
+                    "note": "Transparent baseline for short-term planning, not a production forecast.",
+                }
+            )
+            rolling_values.append(forecast_value)
+
+    forecast = pd.DataFrame(forecast_rows)
+    forecast.to_csv(OUTPUT_DIR / "monthly_forecast.csv", index=False)
+    return forecast
+
+
 def as_money(value: float) -> str:
     return f"GBP {value:,.0f}"
 
@@ -96,6 +163,8 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
     campaign_targets = outputs["campaign_targets.csv"]
     cohort = outputs["cohort_retention.csv"]
     monthly = outputs["monthly_kpis.csv"]
+    quality = outputs["data_quality_checks.csv"]
+    forecast = outputs["monthly_forecast.csv"]
 
     top_segment = rfm_summary.sort_values("segment_revenue", ascending=False).iloc[0].to_dict()
     at_risk = rfm_summary[rfm_summary["rfm_segment"] == "At Risk High Value"]
@@ -109,6 +178,16 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
         if not first_three_months.empty
         else 0.0
     )
+    quality_passed = int((quality["status"] == "Pass").sum())
+    quality_total = int(len(quality))
+    quality_review = int((quality["status"] != "Pass").sum())
+    next_revenue_forecast = forecast[
+        (forecast["metric"] == "monthly_revenue") & (forecast["forecast_month"] > latest_month["transaction_month"])
+    ].iloc[0]
+    next_repeat_forecast = forecast[
+        (forecast["metric"] == "monthly_repeat_purchase_rate")
+        & (forecast["forecast_month"] > latest_month["transaction_month"])
+    ].iloc[0]
 
     summary = {
         "analysis_date": overview["analysis_date"],
@@ -125,6 +204,15 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
         "latest_month": latest_month["transaction_month"],
         "latest_month_revenue": float(latest_month["revenue"]),
         "average_month_1_to_3_retention": early_retention,
+        "data_quality_checks_passed": quality_passed,
+        "data_quality_checks_total": quality_total,
+        "data_quality_review_items": quality_review,
+        "next_forecast_month": next_revenue_forecast["forecast_month"],
+        "next_month_revenue_forecast": float(next_revenue_forecast["forecast_value"]),
+        "next_month_repeat_purchase_rate_forecast": float(
+            next_repeat_forecast["forecast_value"]
+        ),
+        "forecast_method": next_revenue_forecast["method"],
     }
 
     (OUTPUT_DIR / "portfolio_metrics.json").write_text(
@@ -156,6 +244,8 @@ Identify which existing customers should be prioritised for a retention campaign
 - `{summary["at_risk_high_value_customers"]}` customers are classified as `At Risk High Value`, representing {as_money(float(summary["at_risk_high_value_revenue"]))} in historical revenue.
 - The campaign target list contains `{summary["campaign_target_count"]}` customers prioritised by historical value, order frequency, and inactivity.
 - Average month 1 to 3 cohort retention is {as_pct(float(summary["average_month_1_to_3_retention"]))}.
+- Data quality checks passed: {summary["data_quality_checks_passed"]}/{summary["data_quality_checks_total"]}.
+- Next-month revenue baseline forecast: {as_money(float(summary["next_month_revenue_forecast"]))} for {summary["next_forecast_month"]}.
 
 ## Recommended CRM action
 
@@ -165,12 +255,17 @@ Prioritise the `At Risk High Value` segment first. These customers have meaningf
 
 - [Segment revenue view](../documentation/figures/segment_revenue.svg) shows where historical value is concentrated and highlights the retention opportunity.
 - [Monthly KPI trend](../documentation/figures/monthly_kpis.svg) shows how revenue and monthly repeat purchasing change over time.
+- [Monthly forecast baseline](../documentation/figures/monthly_forecast.svg) shows a transparent short-term revenue planning baseline.
 - [Cohort retention heatmap](../documentation/figures/cohort_retention.svg) shows the drop-off in repeat purchasing after the first purchase month.
 - [Campaign decision funnel](../documentation/figures/campaign_funnel.svg) shows how the campaign scope narrows from the full customer base to a testable target list.
 
 ## Measurement recommendation
 
 Run an A/B test on the campaign target list. Randomly assign eligible customers into treatment and control groups, then compare repeat purchase rate, revenue per customer, and average order value over a fixed measurement window.
+
+## Forecasting note
+
+The forecasting extension uses a transparent 3-month moving average baseline for short-term planning. This is useful for trend interpretation, but should not be treated as a production forecasting model without additional validation and business context.
 """
     (OUTPUT_DIR / "executive_summary.md").write_text(md, encoding="utf-8")
 
@@ -284,6 +379,122 @@ def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object
         670,
         "".join(monthly_body),
     )
+
+    # Revenue forecast baseline.
+    forecast = outputs.get("monthly_forecast.csv")
+    if forecast is not None and not forecast.empty:
+        revenue_forecast = forecast[forecast["metric"] == "monthly_revenue"].copy()
+        historical = monthly.tail(12).copy()
+        historical["transaction_month"] = pd.to_datetime(historical["transaction_month"])
+        revenue_forecast["forecast_month"] = pd.to_datetime(revenue_forecast["forecast_month"])
+
+        width, height = 1100, 530
+        left, right, top, bottom = 105, 90, 85, 85
+        plot_width = width - left - right
+        plot_height = height - top - bottom
+        historical_values = historical["revenue"].astype(float).tolist()
+        forecast_values = revenue_forecast["forecast_value"].astype(float).tolist()
+        upper_values = revenue_forecast["upper_practical_band"].astype(float).tolist()
+        maximum = max(historical_values + forecast_values + upper_values) * 1.12
+        all_labels = (
+            historical["transaction_month"].dt.strftime("%Y-%m").tolist()
+            + revenue_forecast["forecast_month"].dt.strftime("%Y-%m").tolist()
+        )
+        total_points = len(all_labels)
+
+        def point_x(index: int) -> float:
+            return left + plot_width * index / max(total_points - 1, 1)
+
+        def point_y(value: float) -> float:
+            return top + plot_height - plot_height * value / maximum
+
+        body = [
+            chart_text(
+                "Short-term revenue forecast baseline from recent monthly performance",
+                left,
+                45,
+                19,
+                weight="500",
+            )
+        ]
+        for fraction in (0, 0.25, 0.5, 0.75, 1):
+            y = top + plot_height - plot_height * fraction
+            body.append(
+                f'<line x1="{left}" y1="{y:.1f}" x2="{width - right}" y2="{y:.1f}" stroke="#d9dee7" stroke-width="1"/>'
+            )
+            body.append(
+                chart_text(
+                    f"GBP {maximum * fraction / 1_000_000:.1f}m",
+                    left - 10,
+                    y + 4,
+                    11,
+                    anchor="end",
+                    fill="#5b6675",
+                )
+            )
+
+        split_index = len(historical_values) - 1
+        split_x = point_x(split_index) + (point_x(split_index + 1) - point_x(split_index)) / 2
+        body.append(
+            f'<line x1="{split_x:.1f}" y1="{top}" x2="{split_x:.1f}" y2="{top + plot_height}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5"/>'
+        )
+        body.append(chart_text("Forecast", split_x + 12, top + 18, 12, fill="#5b6675"))
+
+        historical_points = [
+            (point_x(index), point_y(value)) for index, value in enumerate(historical_values)
+        ]
+        body.append(
+            '<polyline points="'
+            + " ".join(f"{x:.1f},{y:.1f}" for x, y in historical_points)
+            + '" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'
+        )
+
+        forecast_points = [
+            (point_x(split_index), point_y(historical_values[-1])),
+            *[
+                (point_x(split_index + step), point_y(value))
+                for step, value in enumerate(forecast_values, 1)
+            ],
+        ]
+        body.append(
+            '<polyline points="'
+            + " ".join(f"{x:.1f},{y:.1f}" for x, y in forecast_points)
+            + '" fill="none" stroke="#c2410c" stroke-width="3" stroke-dasharray="8 6" stroke-linejoin="round" stroke-linecap="round"/>'
+        )
+
+        for step, row in enumerate(revenue_forecast.itertuples(index=False), 1):
+            x = point_x(split_index + step)
+            y_low = point_y(float(row.lower_practical_band))
+            y_high = point_y(float(row.upper_practical_band))
+            y_mid = point_y(float(row.forecast_value))
+            body.append(
+                f'<line x1="{x:.1f}" y1="{y_low:.1f}" x2="{x:.1f}" y2="{y_high:.1f}" stroke="#c2410c" stroke-width="2" opacity="0.65"/>'
+            )
+            body.append(f'<circle cx="{x:.1f}" cy="{y_mid:.1f}" r="5" fill="#ffffff" stroke="#c2410c" stroke-width="2"/>')
+
+        for index, label in enumerate(all_labels):
+            if index % 2 == 0 or index >= split_index:
+                body.append(
+                    chart_text(
+                        label,
+                        point_x(index),
+                        top + plot_height + 28,
+                        10,
+                        anchor="middle",
+                        fill="#5b6675",
+                    )
+                )
+
+        body.append(chart_text("Historical", left + 4, height - 22, 12, fill="#2563eb"))
+        body.append(chart_text("3-month moving average baseline", left + 110, height - 22, 12, fill="#c2410c"))
+        write_svg(
+            FIGURES_DIR / "monthly_forecast.svg",
+            "Monthly revenue forecast baseline",
+            "Line chart showing recent historical revenue, a three-month moving average forecast and practical uncertainty bands.",
+            width,
+            height,
+            "".join(body),
+        )
 
     # Cohort retention heatmap.
     cohort = outputs["cohort_retention.csv"].copy()
@@ -672,6 +883,7 @@ def main() -> None:
     df = load_transactions(input_path)
     with create_database(df) as conn:
         outputs = run_sql_outputs(conn)
+    outputs["monthly_forecast.csv"] = generate_monthly_forecast(outputs)
     summary = generate_summary(outputs)
     generate_figures(outputs, summary)
     generate_dashboard(outputs, summary)
@@ -679,10 +891,12 @@ def main() -> None:
     print("Generated project outputs:")
     for csv_name in QUERY_OUTPUTS.values():
         print(f"- {OUTPUT_DIR / csv_name}")
+    print(f"- {OUTPUT_DIR / 'monthly_forecast.csv'}")
     print(f"- {OUTPUT_DIR / 'executive_summary.md'}")
     for figure_name in (
         "segment_revenue.svg",
         "monthly_kpis.svg",
+        "monthly_forecast.svg",
         "cohort_retention.svg",
         "campaign_funnel.svg",
     ):

@@ -1,92 +1,168 @@
-# Customer Retention: From SQL Analysis to CRM Decision
+# Customer Prioritisation and Retention Insight Report
 
-Portfolio project based on the UCI Online Retail II transaction dataset. The project answers a practical CRM question and turns the answer into a prioritised campaign list, supporting evidence, and a measurement plan.
+This is a portfolio analytics project that turns historical transaction data into a clear, testable recommendation:
 
-## The business question
+> When resources are limited, which customers should be prioritised, and how should we check whether the action worked?
 
-> A UK online retailer has a limited retention-campaign budget. Which existing customers should be prioritised, and how should the campaign be evaluated?
+The project is deliberately written as a report first and a code project second. A non-technical reviewer can understand the problem, evidence and recommendation from this page; a technical reviewer can then inspect the SQL, generated outputs, data quality checks, forecasting extension and reproducible build script.
 
-## Executive recommendation
+## What data was analysed?
 
-Prioritise the **At Risk High Value** segment first: customers with meaningful historical spend who have not purchased recently. The analysis identifies **397 customers** in this segment, representing **GBP 1.47m of historical revenue**. A ranked list of **300 customers** is provided as a practical campaign test population.
+This project uses the UCI Online Retail II dataset, a historical transaction dataset from a UK-based online retailer. Each row is a transaction line, not a whole order. The data includes invoice IDs, product information, quantities, transaction dates, unit prices, customer IDs and country.
 
-This is a prioritisation hypothesis, not proof that a campaign will cause additional revenue. The recommended next step is a treatment/control test with a fixed measurement window.
+For the analytical version of the project, the raw workbook was cleaned before customer-level analysis. The cleaned table used here covers:
 
-## KPI snapshot
+| Dataset feature | Value |
+|---|---:|
+| Transaction period | 2009-12-01 to 2011-12-09 |
+| Clean transaction rows | 793,609 |
+| Distinct orders | 36,969 |
+| Known customers | 5,878 |
+| Clean revenue | GBP 17.7m |
+| Analysis date | 2011-12-10 |
 
-| Metric | Result | Why it matters |
-| --- | ---: | --- |
-| Known customers | 5,878 | Addressable customer base after cleaning |
-| Orders | 36,969 | Transaction scale used for customer-level analysis |
-| Clean revenue | GBP 17.7m | Historical value available for segmentation |
-| Repeat-customer rate | 72.4% | Shows that repeat purchasing is commercially important |
-| At Risk High Value customers | 397 | Customers with high historical value but low recent activity |
-| At Risk High Value revenue | GBP 1.47m | Historical value associated with the retention opportunity |
-| Prioritised campaign list | 300 | Manageable population for a controlled test |
-| Average M+1 to M+3 retention | 21.6% | Evidence that post-first-purchase retention drops materially |
+Cleaning removed cancelled or unusable records, missing customer IDs, non-positive quantities or prices, exact duplicates and rows that could not support customer-level targeting. The full raw workbook is not committed to this repository; the project includes code, SQL, documentation, summary outputs and visual evidence. More detail is in [`data/README.md`](data/README.md) and [`documentation/data_dictionary.md`](documentation/data_dictionary.md).
 
-Analysis date: **2011-12-10**, set as one day after the latest transaction in the cleaned dataset.
+## 30-second summary
 
-## Evidence for the decision
+| Question | Answer |
+|---|---|
+| What is the practical problem? | A team has a limited retention budget and cannot contact every inactive customer. |
+| What did the analysis find? | 397 customers are `At Risk High Value`, representing GBP 1.47m in historical revenue. |
+| What is the recommendation? | Prioritise this segment first and use the top 300 ranked customers as a manageable test population. |
+| Can the data be trusted? | The cleaned analytical table passed 6/6 data quality checks. |
+| Is this proof the campaign will work? | No. The project recommends a treatment/control evaluation before claiming impact. |
+| What is the short-term trend baseline? | A simple 3-month moving average forecasts GBP 903k revenue for 2012-01. |
 
-### Historical value is concentrated, while the retention opportunity is specific
+## Recommendation
+
+Prioritise the `At Risk High Value` segment first. These customers have meaningful historical spend but have not purchased recently, making them a stronger first test group than low-value inactive customers.
+
+This is a prioritisation hypothesis, not proof of campaign impact. The next step is a controlled test that compares contacted customers with a similar control group over a fixed measurement window.
+
+## Evidence
+
+### 1. Value is concentrated, and the opportunity is specific
 
 ![Segment revenue by RFM group](documentation/figures/segment_revenue.svg)
 
-The revenue chart separates the largest value pools from the segment selected for intervention. The target is not “every inactive customer”; it is the subset where inactivity and historical value overlap.
+The analysis does not recommend contacting every inactive customer. It isolates the overlap between inactivity and historical value.
 
-### Monthly performance is volatile, so customer-level prioritisation matters
+### 2. Monthly performance is volatile
 
 ![Monthly revenue and repeat-purchase KPIs](documentation/figures/monthly_kpis.svg)
 
-Monthly KPIs provide context, but they do not identify who should receive a campaign. That is why the decision uses customer-level recency, frequency, and monetary value.
+Monthly KPIs provide context, but they do not identify who should receive an intervention. That is why the final recommendation uses customer-level recency, frequency and monetary value.
 
-### Retention weakens after the first purchase month
+### 3. A simple forecast gives a short-term baseline
+
+![Monthly revenue forecast baseline](documentation/figures/monthly_forecast.svg)
+
+The forecast is intentionally transparent: a 3-month moving average baseline with practical uncertainty bands. It is useful for trend discussion, not a production forecast.
+
+### 4. Retention weakens after the first purchase month
 
 ![Cohort retention heatmap](documentation/figures/cohort_retention.svg)
 
-The cohort view supports a lifecycle intervention: measure whether targeted customers return during a defined post-campaign window rather than judging the campaign only on immediate revenue.
+The cohort view supports a lifecycle intervention: success should be measured over a defined post-campaign window, not judged only by immediate revenue.
 
-### The recommendation turns a broad dataset into a testable action
+### 5. The broad dataset becomes a testable action
 
 ![Campaign decision funnel](documentation/figures/campaign_funnel.svg)
 
-The funnel shows the decision logic: start with the known customer base, isolate the high-value inactive segment, then rank a manageable campaign population.
+The project turns 5,878 known customers into a prioritised target list of 300 customers that can be used for a controlled campaign test.
+
+## Data quality checks
+
+Before using the analysis for a recommendation, the project checks the cleaned dataset against six data quality dimensions:
+
+| Dimension | Check | Result |
+|---|---|---|
+| Accuracy | Line value matches quantity times price | Pass |
+| Validity | Transaction values are positive and usable | Pass |
+| Timeliness | No transactions after the analysis date | Pass |
+| Completeness | Required fields are populated | Pass |
+| Consistency | Invoices map to one customer | Pass |
+| Uniqueness | No exact duplicate transaction lines | Pass |
+
+Files:
+
+- [`documentation/data_quality_checks.md`](documentation/data_quality_checks.md) explains the checks.
+- [`sql/07_data_quality_checks.sql`](sql/07_data_quality_checks.sql) generates the checks.
+- [`outputs/data_quality_checks.csv`](outputs/data_quality_checks.csv) contains the generated results.
+
+## Forecasting extension
+
+The forecasting extension uses monthly KPI output to create a simple planning baseline:
+
+| Forecast month | Revenue baseline | Repeat-purchase baseline |
+|---|---:|---:|
+| 2012-01 | GBP 903k | 24.5% |
+| 2012-02 | GBP 859k | 24.7% |
+| 2012-03 | GBP 760k | 22.1% |
+
+Files:
+
+- [`documentation/forecasting_extension.md`](documentation/forecasting_extension.md) explains the method and limitations.
+- [`outputs/monthly_forecast.csv`](outputs/monthly_forecast.csv) contains the generated forecast.
+- [`documentation/figures/monthly_forecast.svg`](documentation/figures/monthly_forecast.svg) provides the visual.
+
+## Evaluation plan
+
+The project separates recommendation from proof. Historical data can show who looks like a good priority, but it cannot prove that a campaign caused a customer to return.
+
+The recommended evaluation design is:
+
+| Element | Plan |
+|---|---|
+| Population | At Risk High Value customers with at least two previous orders |
+| Design | Random treatment/control split |
+| Primary metric | Repeat purchase rate during a fixed window |
+| Secondary metrics | Revenue per customer, average order value and order count |
+| Guardrails | Contact cost, opt-outs, contact failures and complaints if available |
+
+Full plan: [`documentation/evaluation_plan.md`](documentation/evaluation_plan.md).
+
+## Skills demonstrated
+
+| Area | Evidence |
+|---|---|
+| Problem framing | Starts with a practical prioritisation question. |
+| SQL analysis | Customer KPIs, RFM segmentation, cohort retention, campaign targets and data quality checks. |
+| Data quality | Checks mapped to accuracy, validity, timeliness, completeness, consistency and uniqueness. |
+| Dashboarding | Static GitHub visuals, generated HTML dashboard and dashboard-ready CSVs. |
+| Forecasting | Moving-average baseline, backtest error and forecast bands. |
+| Evaluation thinking | Treatment/control test plan and clear causality limitations. |
+| Stakeholder reporting | Executive summary, plain-language recommendation and visual evidence. |
+
+Full mapping: [`documentation/skills_demonstrated.md`](documentation/skills_demonstrated.md).
 
 ## Data-to-decision workflow
 
 ```mermaid
 flowchart LR
-    A[Clean transaction CSV] --> B[In-memory SQLite table]
-    B --> C[Customer KPIs and RFM scores]
-    B --> D[Cohort and monthly KPIs]
-    C --> E[Campaign target list]
-    D --> F[Evidence charts]
-    E --> G[CRM recommendation and A/B test plan]
-    F --> G
+    A[Clean transaction data] --> B[Data quality checks]
+    B --> C[SQL customer KPIs]
+    C --> D[RFM segmentation]
+    C --> E[Cohort retention]
+    C --> F[Monthly KPI trends]
+    F --> G[Forecast baseline]
+    D --> H[Campaign target list]
+    E --> I[Evaluation plan]
+    G --> I
+    H --> I
+    I --> J[Recommendation for decision-makers]
 ```
-
-The analysis is reproducible: the same SQL outputs feed both the static GitHub figures and the HTML dashboard. The project uses an in-memory SQLite database during the build; it does not claim to deploy a production database.
-
-## How the analysis supports a business decision
-
-1. **Clean the transaction data** by removing cancelled or unusable records in the upstream cleaning step and excluding incomplete customer records from the analytical table.
-2. **Aggregate at order and customer level** so revenue, order frequency, average order value, and recency are commercially interpretable.
-3. **Segment customers with RFM logic** using recency, frequency, and monetary scores.
-4. **Use a decision rule** in [`04_campaign_targets.sql`](sql/04_campaign_targets.sql): low recency, high monetary value, and at least two historical orders.
-5. **Rank the eligible population** so the output can be handed to a CRM or marketing team rather than stopping at a descriptive chart.
-6. **Measure incrementality** with treatment and control groups using repeat purchase rate, revenue per customer, and average order value.
-
-The SQL also demonstrates the role of filtering at different stages. For example, [`06_repeat_customer_summary.sql`](sql/06_repeat_customer_summary.sql) uses `WHERE` to exclude incomplete records before aggregation and `HAVING` to retain customers with at least two orders. The clauses are tied to the business question rather than added only for syntax coverage.
 
 ## Outputs
 
-- [`outputs/executive_summary.md`](outputs/executive_summary.md) — generated one-page decision summary.
-- [`dashboard/customer_retention_dashboard.html`](dashboard/customer_retention_dashboard.html) — generated dashboard with KPI cards, segment bars, target rows, and cohort heatmap.
-- [`outputs/campaign_targets.csv`](outputs/campaign_targets.csv) — ranked list of 300 campaign candidates.
-- [`outputs/rfm_segment_summary.csv`](outputs/rfm_segment_summary.csv) — segment-level customer and revenue summary.
-- [`outputs/monthly_kpis.csv`](outputs/monthly_kpis.csv) — monthly revenue, order, customer, AOV, and repeat-purchase KPIs.
-- [`documentation/figures/`](documentation/figures/) — static SVG charts embedded above for GitHub viewing.
+- [`outputs/executive_summary.md`](outputs/executive_summary.md) - generated one-page decision summary.
+- [`dashboard/customer_retention_dashboard.html`](dashboard/customer_retention_dashboard.html) - generated dashboard with KPI cards, segment bars, target rows and cohort heatmap.
+- [`outputs/campaign_targets.csv`](outputs/campaign_targets.csv) - ranked list of 300 campaign candidates.
+- [`outputs/rfm_segment_summary.csv`](outputs/rfm_segment_summary.csv) - segment-level customer and revenue summary.
+- [`outputs/monthly_kpis.csv`](outputs/monthly_kpis.csv) - monthly revenue, order, customer, AOV and repeat-purchase KPIs.
+- [`outputs/monthly_forecast.csv`](outputs/monthly_forecast.csv) - short-term forecast baseline.
+- [`outputs/data_quality_checks.csv`](outputs/data_quality_checks.csv) - generated quality-assurance checks.
 
 ## Reproduce the analysis
 
@@ -103,21 +179,23 @@ pip install -r requirements.txt
 python scripts/build_customer_retention_outputs.py
 ```
 
-To use another cleaned CSV, update `DEFAULT_INPUT` in the build script or call the loading function from a small wrapper. The expected columns are documented in [`documentation/data_dictionary.md`](documentation/data_dictionary.md).
+The script generates the SQL outputs, executive summary, dashboard and SVG figures. The expected input fields are documented in [`documentation/data_dictionary.md`](documentation/data_dictionary.md).
 
 ## Repository map
 
 ```text
-sql/                 business questions expressed as SQL transformations
-scripts/             reproducible output and chart generation
-outputs/             CSV extracts, metrics, and executive summary
-documentation/       business brief, analysis notes, data dictionary, figures
+sql/                 SQL transformations and quality checks
+scripts/             reproducible output, forecast, dashboard and chart generation
+outputs/             CSV extracts, metrics, forecast and executive summary
+documentation/       business brief, data dictionary, analysis notes and application-ready explanations
 dashboard/           generated HTML dashboard
+data/                source and cleaning notes
 ```
 
 ## Limitations and next steps
 
 - Transaction history shows association, not campaign causality.
-- The prioritisation uses revenue rather than profit because margin and campaign cost are not available.
-- Customers without a usable customer ID are excluded from customer-level targeting.
-- The next production step would be to add campaign history, margin, channel permissions, contact cost, and a persisted CRM-ready table.
+- Revenue is used instead of profit because margin and campaign cost are not available.
+- Channel permissions, contact history and campaign history are not available.
+- The forecast is a transparent baseline, not a production model.
+- A production version would add margin, contact permissions, campaign cost, customer consent, Power BI deployment and a persisted CRM-ready table.
