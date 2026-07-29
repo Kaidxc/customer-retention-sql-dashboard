@@ -1,0 +1,19 @@
+feature,bucket,orders,order_share,description
+order_value,<=GBP25,1349,0.0365,Total value of a completed invoice.
+order_value,GBP25-50,1042,0.0282,Total value of a completed invoice.
+order_value,GBP50-100,2067,0.0559,Total value of a completed invoice.
+order_value,GBP100-250,10715,0.2898,Total value of a completed invoice.
+order_value,GBP250-500,12902,0.349,Total value of a completed invoice.
+order_value,GBP500+,8894,0.2406,Total value of a completed invoice.
+units_purchased,1-5,1211,0.0328,Total units purchased in a completed invoice.
+units_purchased,6-10,586,0.0159,Total units purchased in a completed invoice.
+units_purchased,11-25,1743,0.0471,Total units purchased in a completed invoice.
+units_purchased,26-50,2854,0.0772,Total units purchased in a completed invoice.
+units_purchased,51-100,6332,0.1713,Total units purchased in a completed invoice.
+units_purchased,101+,24243,0.6558,Total units purchased in a completed invoice.
+distinct_products,1,3072,0.0831,Distinct stock codes included in a completed invoice.
+distinct_products,2-3,2656,0.0718,Distinct stock codes included in a completed invoice.
+distinct_products,4-6,3595,0.0972,Distinct stock codes included in a completed invoice.
+distinct_products,7-10,4402,0.1191,Distinct stock codes included in a completed invoice.
+distinct_products,11-20,9808,0.2653,Distinct stock codes included in a completed invoice.
+distinct_products,21+,13436,0.3634,Distinct stock codes included in a completed invoice.

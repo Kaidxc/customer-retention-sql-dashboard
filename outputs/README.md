@@ -11,6 +11,7 @@ python scripts/build_customer_retention_outputs.py
 | File | Description |
 |---|---|
 | `dataset_overview.csv` | Overall dataset size, revenue, date range and analysis date |
+| `order_purchase_summary.csv` | One row per invoice with order value, units purchased, product lines and distinct products |
 | `product_performance.csv` | Product-level units, revenue, orders, customers, selling price, active months and ranks |
 | `product_revenue_concentration.csv` | Revenue share for Top 10, Top 50, Top 100 and Top 500 merchandise products |
 | `product_catalog_summary.csv` | Bucketed product distributions for active months, revenue and days since last sale |
@@ -20,6 +21,7 @@ python scripts/build_customer_retention_outputs.py
 | `product_quarterly_sales.csv` | Product-by-quarter quantity, revenue, orders and customer reach |
 | `product_next_quarter_forecast.csv` | Next-quarter baseline for stable high-revenue merchandise products |
 | `monthly_kpis.csv` | Monthly revenue, orders, customers, AOV and repeat-purchase context |
+| `purchase_behavior_summary.csv` | Bucketed order-value, units-per-order and distinct-products-per-order distributions |
 | `data_quality_checks.csv` | Generated checks for accuracy, validity, timeliness, completeness, consistency and uniqueness |
 | `executive_summary.md` | Generated product sales and demand summary |
 | `portfolio_metrics.json` | Compact metrics used by the generated dashboard |

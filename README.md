@@ -1,14 +1,14 @@
 # Online Retail Product Sales and Demand Analysis
 
-A UK online retailer has two years of order-line history. Each row records a product sold within an invoice: what was sold, how many units were bought, when it was bought, at what price, and by which customer ID.
+A UK online retailer has two years of order-line sales history. Each row records one product line inside an invoice: what was sold, how many units were bought, when it was bought, at what price, and by which customer ID.
 
 The business question is:
 
-> Which products are driving sales, which products are slowing down, and what should the business plan for next quarter?
+> After cleaning the transaction data, what products does the business sell, what do customer purchases look like, which products sell best, and what should the business plan for next quarter?
 
-This report focuses on product sales and demand. Customer IDs are used only as purchase-behaviour context, because the dataset does not contain demographic customer information such as age, gender, occupation, membership tier or marketing channel.
+This report focuses on products, sales and demand. The dataset has customer IDs, but it does not contain demographic customer attributes such as age, gender, occupation, membership tier or marketing channel. Customer IDs are therefore used only to describe purchase behaviour and product reach.
 
-## Data Overview
+## Data Used
 
 The project uses the UCI Online Retail II dataset, cleaned into transaction-line records for analysis.
 
@@ -23,7 +23,7 @@ The project uses the UCI Online Retail II dataset, cleaned into transaction-line
 | Countries/regions | 41 |
 | Clean revenue | GBP 17.7m |
 
-The raw dataset is a sales-order table at product-line level. One invoice can appear across many rows if the customer bought multiple products in the same order.
+The raw dataset is an order-line table. One invoice can appear across many rows when a customer buys multiple products in the same order.
 
 | Layer | What it represents | Example fields |
 |---|---|---|
@@ -34,54 +34,110 @@ The raw dataset is a sales-order table at product-line level. One invoice can ap
 
 Cleaning removed cancelled or unusable records, missing customer IDs, non-positive quantities or prices, duplicate transaction lines and rows that could not support sales analysis. Source and cleaning notes are in [`data/README.md`](data/README.md).
 
-## Sales Trend Context
+## 1. Product Types After Cleaning
 
-Before deciding which products to protect, promote or review, the business needs a view of overall sales movement. Monthly revenue and order volume show the trading backdrop behind the product recommendations.
+The dataset does not contain a formal product category field. Product variety is therefore represented by `stock_code`, product description, sales activity and whether a stock code is a sellable merchandise item or a service/admin line.
 
-![Monthly sales and order trend](documentation/figures/monthly_kpis.svg)
-
-The monthly pattern is not flat, so product decisions should be reviewed with timing and seasonality in mind. This is why the report separates historical product ranking from the next-quarter planning baseline.
-
-## Executive Recommendation
-
-The business should manage products in four groups:
-
-1. **Protect stock for high-revenue products.** These products drive income and need availability planning.
-2. **Use high-unit products for bundles and add-ons.** Some products sell many units but generate lower revenue, so they can support basket-building.
-3. **Review slow-moving products before discounting or delisting.** Several products have meaningful historical revenue but no sale for at least 180 days.
-4. **Forecast only stable high-revenue products individually.** The full catalogue is too sparse and long-tailed for useful product-by-product forecasting.
-
-## What the Product Catalogue Looks Like
-
-The catalogue is broad and long-tailed. Many products sell only intermittently, while a smaller group sells consistently across many months.
+| Product structure | Finding |
+|---|---:|
+| Merchandise products | 4,626 |
+| Service/admin stock lines | 5 |
+| Distinct product descriptions in product outputs | 4,589 |
+| Products active in 19-25 months | 1,464 |
+| Products with GBP 50k+ historical revenue | 28 |
+| Products with no sale for 365+ days | 1,004 |
 
 ![Product catalogue overview](documentation/figures/product_catalog_overview.svg)
 
-Important patterns:
+Key interpretation:
 
-- There are **4,626 merchandise products** after excluding service/admin lines such as postage and manual adjustments.
-- The top **10** merchandise products account for **8.1%** of merchandise revenue.
-- The top **100** merchandise products account for **29.8%** of merchandise revenue.
-- The top **500** merchandise products account for **64.0%** of merchandise revenue.
-- This means the business has a meaningful core range, but also a large long tail that should not be forecast or managed product-by-product in the same way.
+- The retailer has a broad catalogue, not a small fixed product set.
+- Revenue is long-tailed: the top 10 merchandise products account for 8.1% of merchandise revenue, while the top 500 account for 64.0%.
+- Because the catalogue is long-tailed, the same method should not be used for every product. Core products can be forecast individually; sparse or old products need lifecycle review.
 
-## Top Products by Revenue
+## 2. Customer and Purchase Behaviour
 
-Revenue ranking identifies products that matter most commercially. These should be protected from stockouts and reviewed for margin, placement and promotion.
+The data does not describe who the customers are demographically. It does show how customers purchase.
 
-![Top products by revenue](documentation/figures/top_products_by_revenue.svg)
+| Behaviour metric | Finding |
+|---|---:|
+| Known customers | 5,878 |
+| One-time customers | 1,623 |
+| Repeat customers | 4,255 |
+| Repeat customer share | 72.4% |
+| Median orders per customer | 3 |
+| Median customer revenue | GBP 887 |
+| Median order value | GBP 305 |
+| Median units per order | 154 |
+| Median distinct products per order | 15 |
 
-The top revenue product is **REGENCY CAKESTAND 3 TIER** (`22423`), generating **GBP 285,992** from **24,858 units**.
+![Customer and purchase behaviour](documentation/figures/customer_purchase_overview.svg)
 
-## Top Products by Units Sold
+What this shows:
 
-Unit ranking tells a different story. These products create volume and basket activity, but they are not always the highest revenue drivers.
+- Most known customers placed more than one order, so product demand is not only from one-off buyers.
+- Orders are often multi-item baskets: the median order contains 15 distinct products.
+- This makes product reach useful: a product bought by many customers and appearing in many orders is more reliable than a product driven by one unusually large order.
+
+## 3. Monthly Sales Context
+
+Before ranking individual products, it helps to see the overall sales pattern.
+
+![Monthly sales and order trend](documentation/figures/monthly_kpis.svg)
+
+The monthly pattern is not flat. Product decisions should therefore consider timing and seasonality, especially for slow-moving products and next-quarter planning.
+
+## 4. Top 10 Best-Selling Products
+
+The table below ranks products by units sold. This answers: which products physically sold the most?
 
 ![Top products by quantity](documentation/figures/top_products_by_quantity.svg)
 
-The top unit product is **WORLD WAR 2 GLIDERS ASSTD DESIGNS** (`84077`), with **108,929 units** sold but only **GBP 24,844** in revenue. This is a useful candidate for basket-building, add-on offers or volume-led merchandising rather than premium revenue focus.
+| Rank | Stock code | Product | Units sold | Revenue | Orders | Customers |
+|---:|---|---|---:|---:|---:|---:|
+| 1 | 84077 | WORLD WAR 2 GLIDERS ASSTD DESIGNS | 108,929 | GBP 24,844 | 920 | 482 |
+| 2 | 85099B | RED RETROSPOT JUMBO BAG | 94,809 | GBP 170,298 | 3,260 | 978 |
+| 3 | 85123A | WHITE HANGING HEART T-LIGHT HOLDER | 93,577 | GBP 251,887 | 4,895 | 1,490 |
+| 4 | 21212 | PACK OF 72 RETROSPOT CAKE CASES | 91,175 | GBP 44,019 | 2,508 | 1,115 |
+| 5 | 23843 | PAPER CRAFT, LITTLE BIRDIE | 80,995 | GBP 168,470 | 1 | 1 |
+| 6 | 84879 | ASSORTED COLOUR BIRD ORNAMENT | 79,694 | GBP 126,704 | 2,652 | 1,010 |
+| 7 | 22197 | SMALL POPCORN HOLDER | 77,933 | GBP 59,069 | 1,752 | 601 |
+| 8 | 23166 | MEDIUM CERAMIC TOP STORAGE JAR | 77,916 | GBP 81,417 | 195 | 138 |
+| 9 | 17003 | BROCADE RING PURSE | 71,093 | GBP 14,817 | 387 | 215 |
+| 10 | 21977 | PACK OF 60 PINK PAISLEY CAKE CASES | 55,101 | GBP 26,656 | 1,578 | 767 |
 
-## Products That Need Review
+Important reading:
+
+- High unit volume does not always mean high revenue. `84077` sells the most units but generates much less revenue than the top revenue products.
+- `23843` is a special case: it has very high units and revenue but appears in only one order from one customer. It should be reviewed as a bulk or unusual transaction before being treated as a normal bestseller.
+- `85123A` is strong across units, revenue, orders and customers, making it a broad-demand product rather than a one-off spike.
+
+## 5. Top 10 Products by Revenue
+
+Revenue ranking answers a different question: which products matter most commercially?
+
+![Top products by revenue](documentation/figures/top_products_by_revenue.svg)
+
+| Rank | Stock code | Product | Revenue | Units sold | Orders | Customers |
+|---:|---|---|---:|---:|---:|---:|
+| 1 | 22423 | REGENCY CAKESTAND 3 TIER | GBP 285,992 | 24,858 | 3,317 | 1,314 |
+| 2 | 85123A | WHITE HANGING HEART T-LIGHT HOLDER | GBP 251,887 | 93,577 | 4,895 | 1,490 |
+| 3 | 85099B | RED RETROSPOT JUMBO BAG | GBP 170,298 | 94,809 | 3,260 | 978 |
+| 4 | 23843 | PAPER CRAFT, LITTLE BIRDIE | GBP 168,470 | 80,995 | 1 | 1 |
+| 5 | 84879 | ASSORTED COLOUR BIRD ORNAMENT | GBP 126,704 | 79,694 | 2,652 | 1,010 |
+| 6 | 47566 | PARTY BUNTING | GBP 103,803 | 23,591 | 2,077 | 894 |
+| 7 | 23166 | MEDIUM CERAMIC TOP STORAGE JAR | GBP 81,417 | 77,916 | 195 | 138 |
+| 8 | 22086 | PAPER CHAIN KIT 50'S CHRISTMAS | GBP 79,456 | 29,430 | 1,691 | 896 |
+| 9 | 79321 | CHILLI LIGHTS | GBP 72,528 | 15,658 | 922 | 304 |
+| 10 | 22386 | JUMBO BAG PINK WITH WHITE SPOTS | GBP 68,377 | 37,680 | 1,767 | 601 |
+
+Product action:
+
+- Protect availability for high-revenue, broad-reach products such as `22423`, `85123A`, `85099B` and `84879`.
+- Use high-unit lower-revenue products as basket builders, add-ons or bundle components.
+- Review unusually concentrated products, such as products driven by one order, before using them in planning.
+
+## 6. Products That Need Review
 
 Slow-moving products are not simply products with low sales. This report flags products with meaningful historical revenue but no sale for at least 180 days.
 
@@ -95,11 +151,11 @@ These products should be reviewed before taking action:
 
 The generated list is in [`outputs/slow_moving_product_candidates.csv`](outputs/slow_moving_product_candidates.csv).
 
-## Next-Quarter Product Forecast
+## 7. Next-Quarter Product Forecast
 
 Forecasting every product would be misleading because many products are sparse, seasonal or discontinued. Instead, the forecast is limited to stable high-revenue merchandise products.
 
-The current baseline uses the average of the last four quarters. For the top 20 stable products, the next-quarter baseline for **2012-Q1** is:
+The current baseline uses the average of the last four quarters. For the top 20 stable products, the next-quarter baseline for 2012-Q1 is:
 
 | Forecast scope | Baseline |
 |---|---:|
@@ -111,18 +167,14 @@ The current baseline uses the average of the last four quarters. For the top 20 
 
 This is a planning baseline, not a production demand model. It is useful for identifying where a buyer, merchandising or operations team should start reviewing stock and promotion plans.
 
-## Customer Purchase Behaviour as Context
+## Recommendation
 
-The dataset has `customer_id`, so customer behaviour can help explain demand breadth, but it should not be treated as demographic profiling.
+The business should manage products in four groups:
 
-Useful customer-related questions include:
-
-- How many unique customers bought each product?
-- Are high-revenue products bought by many customers or a small number of buyers?
-- Which products appear in many orders and support basket-building?
-- Which products are associated with repeat purchasing?
-
-For example, **WHITE HANGING HEART T-LIGHT HOLDER** (`85123A`) appears in **4,895 orders** and reaches **1,490 customers**, making it both a high-revenue product and a broad-demand product.
+1. **Protect stock for high-revenue, broad-reach products.** These products drive income and appear across many orders/customers.
+2. **Use high-unit lower-revenue products for baskets and bundles.** They can increase order size even when they are not premium revenue drivers.
+3. **Review slow-moving products before discounting or delisting.** The transaction data shows lack of recent sales, but not whether the cause is stockout, discontinuation or weak demand.
+4. **Forecast stable products individually and manage the long tail by rules.** The full catalogue is too sparse for reliable product-by-product forecasting.
 
 ## Data Quality Checks
 
@@ -141,39 +193,36 @@ Generated results: [`outputs/data_quality_checks.csv`](outputs/data_quality_chec
 
 ## Analytical Outputs
 
-Main product outputs:
+Main outputs:
 
 - [`outputs/product_performance.csv`](outputs/product_performance.csv) - product-level units, revenue, orders, customers and active months.
+- [`outputs/order_purchase_summary.csv`](outputs/order_purchase_summary.csv) - one row per invoice with order value, units and distinct products.
+- [`outputs/customer_profile_summary.csv`](outputs/customer_profile_summary.csv) - customer purchase-behaviour distributions.
+- [`outputs/purchase_behavior_summary.csv`](outputs/purchase_behavior_summary.csv) - order-value and basket-size distributions.
 - [`outputs/product_revenue_concentration.csv`](outputs/product_revenue_concentration.csv) - Top 10/50/100/500 revenue concentration.
-- [`outputs/top_products_by_revenue.csv`](outputs/top_products_by_revenue.csv) - Top 10 merchandise products by revenue.
 - [`outputs/top_products_by_quantity.csv`](outputs/top_products_by_quantity.csv) - Top 10 merchandise products by units sold.
+- [`outputs/top_products_by_revenue.csv`](outputs/top_products_by_revenue.csv) - Top 10 merchandise products by revenue.
 - [`outputs/slow_moving_product_candidates.csv`](outputs/slow_moving_product_candidates.csv) - products with historical revenue but no recent sales.
 - [`outputs/product_next_quarter_forecast.csv`](outputs/product_next_quarter_forecast.csv) - next-quarter baseline for stable high-revenue products.
 - [`outputs/executive_summary.md`](outputs/executive_summary.md) - generated report summary.
-
-Supporting outputs:
-
-- [`outputs/monthly_kpis.csv`](outputs/monthly_kpis.csv) - monthly revenue, orders, customers and repeat-purchase context.
-- [`outputs/customer_metrics.csv`](outputs/customer_metrics.csv) - customer purchase behaviour metrics.
-- [`outputs/data_quality_checks.csv`](outputs/data_quality_checks.csv) - generated quality checks.
 
 ## Data-to-Decision Workflow
 
 ```mermaid
 flowchart LR
     A[Clean transaction lines] --> B[Data quality checks]
-    B --> C[Product performance table]
-    C --> D[Top products by revenue]
-    C --> E[Top products by units]
-    C --> F[Revenue concentration]
-    C --> G[Slow-moving product review]
-    C --> H[Stable product forecast]
-    H --> I[Next-quarter planning baseline]
-    D --> J[Product actions]
-    E --> J
-    F --> J
-    G --> J
-    I --> J
+    B --> C[Product catalogue structure]
+    B --> D[Customer and purchase behaviour]
+    C --> E[Top 10 by units]
+    C --> F[Top 10 by revenue]
+    D --> G[Product reach context]
+    E --> H[Product actions]
+    F --> H
+    G --> H
+    C --> I[Slow-moving review]
+    C --> J[Stable product forecast]
+    I --> H
+    J --> H
 ```
 
 ## Reproduce the Analysis
@@ -196,7 +245,7 @@ The script generates SQL outputs, product CSVs, the HTML dashboard, SVG figures 
 ## Limitations and Next Steps
 
 - The dataset contains product and transaction behaviour, not customer demographic attributes.
+- The dataset does not include product category, inventory, stockout, cost or margin fields.
 - Revenue is used instead of profit because product cost and margin are not available.
-- Stock levels are not available, so slow-moving analysis cannot confirm whether a product was unavailable or simply not demanded.
+- Products with weak recent sales may be discontinued, seasonal or out of stock; transaction history alone cannot separate these causes.
 - Forecasting is limited to stable high-revenue products; sparse long-tail products should be managed by category or lifecycle rules.
-- A production version should add inventory, margin, product category, promotion history and current stock availability.

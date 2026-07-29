@@ -6,7 +6,7 @@ This project is written as a product sales and demand analysis report for non-te
 
 | Skill | Evidence in the project |
 |---|---|
-| Problem framing | Starts from product planning questions: what sells, what slows down, and what should be planned next. |
+| Problem framing | Starts from a clear business sequence: what products exist, what purchases look like, what sells best and what should be planned next. |
 | Decision support | Produces product actions for stock protection, bundling, slow-moving review and forecasting. |
 | Stakeholder communication | Uses a plain-language report, executive summary and visual evidence. |
 | Limitation handling | Explains missing margin, inventory, product category and customer demographic data. |
@@ -16,9 +16,10 @@ This project is written as a product sales and demand analysis report for non-te
 
 | Skill | Evidence in the project |
 |---|---|
-| SQL transformation | Product performance, revenue concentration, quarterly sales, monthly KPIs and data quality checks. |
-| KPI design | Units sold, revenue, order count, customer reach, active months, average selling price and days since last sale. |
+| SQL transformation | Product performance, order purchase summary, revenue concentration, quarterly sales, monthly KPIs and data quality checks. |
+| KPI design | Units sold, revenue, order count, customer reach, active months, average selling price, order value, units per order and days since last sale. |
 | Product analysis | Top products by revenue, Top products by quantity, catalogue long-tail structure and slow-moving candidates. |
+| Purchase behaviour analysis | Customer repeat status, orders per customer, order value distribution and basket-size distribution. |
 | Forecasting | Last-four-quarter average baseline for stable high-revenue merchandise products. |
 | Data quality | Checks mapped to accuracy, validity, timeliness, completeness, consistency and uniqueness. |
 | Customer-behaviour context | Uses customer IDs only for purchase reach and repeat-behaviour context, not demographic profiling. |

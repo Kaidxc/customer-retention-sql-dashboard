@@ -7,7 +7,7 @@
 It contains:
 
 - Executive KPIs: revenue, merchandise products, orders and Top 500 revenue share.
-- Product catalogue structure and revenue concentration.
+- Product catalogue structure, customer purchase behaviour and revenue concentration.
 - Top products by revenue.
 - Top products by units sold.
 - Slow-moving product candidates.
@@ -21,6 +21,7 @@ The repository homepage also includes static SVG versions of the key visuals so 
 For a Power BI version, import these files from `../outputs`:
 
 - `product_performance.csv`
+- `order_purchase_summary.csv`
 - `product_revenue_concentration.csv`
 - `top_products_by_revenue.csv`
 - `top_products_by_quantity.csv`
@@ -28,19 +29,23 @@ For a Power BI version, import these files from `../outputs`:
 - `product_quarterly_sales.csv`
 - `product_next_quarter_forecast.csv`
 - `monthly_kpis.csv`
+- `customer_profile_summary.csv`
+- `purchase_behavior_summary.csv`
 - `data_quality_checks.csv`
 
 Recommended pages:
 
 1. Overview - revenue, orders, products, countries and product concentration.
-2. Product Leaders - Top products by revenue and units sold.
-3. Catalogue Health - active months, low-revenue products and slow-moving candidates.
-4. Forecast - next-quarter baseline for stable high-revenue products.
-5. Data Quality - quality checks and cleaning assumptions.
+2. Customer and Purchases - repeat status, orders per customer, order value and basket size.
+3. Product Leaders - Top products by revenue and units sold.
+4. Catalogue Health - active months, low-revenue products and slow-moving candidates.
+5. Forecast - next-quarter baseline for stable high-revenue products.
+6. Data Quality - quality checks and cleaning assumptions.
 
 ## Suggested visuals
 
 - KPI cards for revenue, orders, stock codes and merchandise products.
+- Distribution charts for repeat status, orders per customer, order value and units per order.
 - Bar charts for Top 10 revenue and Top 10 quantity products.
 - Concentration chart for Top 10/50/100/500 revenue share.
 - Table for slow-moving product candidates.

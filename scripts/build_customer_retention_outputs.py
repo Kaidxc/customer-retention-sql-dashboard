@@ -26,6 +26,7 @@ FIGURES_DIR = PROJECT_ROOT / "documentation" / "figures"
 QUERY_OUTPUTS = {
     "00_dataset_overview.sql": "dataset_overview.csv",
     "01_customer_kpis.sql": "customer_metrics.csv",
+    "02_order_purchase_summary.sql": "order_purchase_summary.csv",
     "05_monthly_kpis.sql": "monthly_kpis.csv",
     "06_repeat_customer_summary.sql": "repeat_customer_summary.csv",
     "07_data_quality_checks.sql": "data_quality_checks.csv",
@@ -221,6 +222,58 @@ def generate_customer_profile_summary(outputs: dict[str, pd.DataFrame]) -> pd.Da
     return profile
 
 
+def generate_purchase_behavior_summary(outputs: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    orders = outputs["order_purchase_summary.csv"].copy()
+    total_orders = len(orders)
+    rows: list[dict[str, object]] = []
+
+    def add_bucket_summary(
+        feature: str,
+        values: pd.Series,
+        bins: list[float],
+        labels: list[str],
+        description: str,
+    ) -> None:
+        bucketed = pd.cut(values, bins=bins, labels=labels, include_lowest=True)
+        counts = bucketed.value_counts(sort=False)
+        for label, count in counts.items():
+            rows.append(
+                {
+                    "feature": feature,
+                    "bucket": str(label),
+                    "orders": int(count),
+                    "order_share": round(count / total_orders, 4),
+                    "description": description,
+                }
+            )
+
+    add_bucket_summary(
+        "order_value",
+        orders["order_value"],
+        [-0.01, 25, 50, 100, 250, 500, float("inf")],
+        ["<=GBP25", "GBP25-50", "GBP50-100", "GBP100-250", "GBP250-500", "GBP500+"],
+        "Total value of a completed invoice.",
+    )
+    add_bucket_summary(
+        "units_purchased",
+        orders["units_purchased"],
+        [0, 5, 10, 25, 50, 100, float("inf")],
+        ["1-5", "6-10", "11-25", "26-50", "51-100", "101+"],
+        "Total units purchased in a completed invoice.",
+    )
+    add_bucket_summary(
+        "distinct_products",
+        orders["distinct_products"],
+        [0, 1, 3, 6, 10, 20, float("inf")],
+        ["1", "2-3", "4-6", "7-10", "11-20", "21+"],
+        "Distinct stock codes included in a completed invoice.",
+    )
+
+    summary = pd.DataFrame(rows)
+    summary.to_csv(OUTPUT_DIR / "purchase_behavior_summary.csv", index=False)
+    return summary
+
+
 def generate_product_report_outputs(outputs: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     product_performance = outputs["product_performance.csv"].copy()
     merchandise = product_performance[
@@ -367,6 +420,9 @@ def as_pct(value: float) -> str:
 
 def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
     overview = outputs["dataset_overview.csv"].iloc[0].to_dict()
+    customer_metrics = outputs["customer_metrics.csv"]
+    customer_profile = outputs["customer_profile_summary.csv"]
+    order_summary = outputs["order_purchase_summary.csv"]
     quality = outputs["data_quality_checks.csv"]
     product_performance = outputs["product_performance.csv"]
     product_concentration = outputs["product_revenue_concentration.csv"]
@@ -408,6 +464,18 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
     )
     forecast_total_revenue = float(product_forecast["forecast_revenue"].sum())
     forecast_total_quantity = float(product_forecast["forecast_quantity"].sum())
+    one_time_customers = int(
+        customer_profile[
+            (customer_profile["feature"] == "repeat_status")
+            & (customer_profile["bucket"] == "One-time customer")
+        ]["customers"].iloc[0]
+    )
+    repeat_customers = int(
+        customer_profile[
+            (customer_profile["feature"] == "repeat_status")
+            & (customer_profile["bucket"] == "Repeat customer")
+        ]["customers"].iloc[0]
+    )
 
     summary = {
         "analysis_date": overview["analysis_date"],
@@ -438,6 +506,16 @@ def generate_summary(outputs: dict[str, pd.DataFrame]) -> dict[str, object]:
         "broad_demand_product_orders": int(broad_demand_product["order_count"]),
         "broad_demand_product_customers": int(broad_demand_product["customer_count"]),
         "broad_demand_product_revenue": float(broad_demand_product["total_revenue"]),
+        "one_time_customers": one_time_customers,
+        "repeat_customers": repeat_customers,
+        "repeat_customer_share": repeat_customers / max(int(overview["distinct_customers"]), 1),
+        "median_customer_orders": float(customer_metrics["total_orders"].median()),
+        "median_customer_revenue": float(customer_metrics["total_revenue"].median()),
+        "median_order_value": float(order_summary["order_value"].median()),
+        "median_units_per_order": float(order_summary["units_purchased"].median()),
+        "median_distinct_products_per_order": float(
+            order_summary["distinct_products"].median()
+        ),
         "slow_moving_candidate_count": int(len(slow_products)),
         "forecast_product_count": int(len(product_forecast)),
         "next_product_forecast_quarter": product_forecast["next_quarter"].iloc[0],
@@ -475,6 +553,7 @@ Analyse online retail transaction lines to understand product sales structure, i
 - Top revenue product: `{summary["top_revenue_product_description"]}` ({summary["top_revenue_product_code"]}), generating {as_money(float(summary["top_revenue_product_revenue"]))}.
 - Top quantity product: `{summary["top_quantity_product_description"]}` ({summary["top_quantity_product_code"]}), with {summary["top_quantity_product_units"]:,} units sold.
 - Broadest-reach product: `{summary["broad_demand_product_description"]}` ({summary["broad_demand_product_code"]}), appearing in {summary["broad_demand_product_orders"]:,} orders from {summary["broad_demand_product_customers"]:,} customers.
+- Customer and purchase behaviour: {summary["repeat_customers"]:,} customers ({as_pct(float(summary["repeat_customer_share"]))}) placed at least two orders; the median order value is {as_money(float(summary["median_order_value"]))} and the median order contains {summary["median_units_per_order"]:,.0f} units.
 - {summary["slow_moving_candidate_count"]} high-history-revenue merchandise products have not sold for at least 180 days and should be reviewed for clearance, bundling, relisting or delisting.
 - Next-quarter baseline for {summary["forecast_product_count"]} stable high-revenue merchandise products: {summary["forecast_top_product_quantity"]:,.0f} units and {as_money(float(summary["forecast_top_product_revenue"]))} revenue in {summary["next_product_forecast_quarter"]}.
 - Customer IDs support demand context, but the dataset does not contain demographic customer features such as age, gender or occupation.
@@ -486,6 +565,7 @@ Protect stock availability for high-revenue products, use high-volume lower-reve
 ## Evidence for decision-makers
 
 - [Product catalogue overview](../documentation/figures/product_catalog_overview.svg) shows catalogue breadth, active-month distribution and revenue concentration.
+- [Customer and purchase behaviour](../documentation/figures/customer_purchase_overview.svg) shows repeat status, customer order frequency, order value and units per order.
 - [Top products by revenue](../documentation/figures/top_products_by_revenue.svg) highlights the products driving income.
 - [Top products by quantity](../documentation/figures/top_products_by_quantity.svg) highlights the products driving unit demand.
 - [Slow-moving product candidates](../documentation/figures/slow_moving_products.svg) shows products with historical value but weak recent sales.
@@ -627,6 +707,127 @@ def generate_figures(outputs: dict[str, pd.DataFrame], summary: dict[str, object
             FIGURES_DIR / "product_catalog_overview.svg",
             "Product catalogue overview",
             "Panels show merchandise product active-month distribution, historical revenue buckets and revenue concentration.",
+            width,
+            height,
+            "".join(body),
+        )
+
+    # Customer and purchase behaviour overview.
+    customer_profile = outputs.get("customer_profile_summary.csv")
+    purchase_behavior = outputs.get("purchase_behavior_summary.csv")
+    if customer_profile is not None and purchase_behavior is not None:
+        width, height = 1200, 760
+        body = [
+            chart_text(
+                "Customer and purchase behaviour after cleaning",
+                55,
+                48,
+                20,
+                weight="500",
+            ),
+            chart_text(
+                f"{summary['distinct_customers']:,} known customers | {summary['distinct_orders']:,} completed orders | median order value: {as_money(float(summary['median_order_value']))}",
+                55,
+                76,
+                13,
+                fill="#5b6675",
+            ),
+        ]
+
+        def distribution_panel(
+            subset: pd.DataFrame,
+            title: str,
+            x0: int,
+            y0: int,
+            panel_width: int,
+            panel_height: int,
+            count_col: str,
+            share_col: str,
+            color: str,
+        ) -> None:
+            max_count = max(int(subset[count_col].max()), 1)
+            label_width = 116
+            value_width = 120
+            bar_x = x0 + label_width
+            bar_width = panel_width - label_width - value_width - 18
+            row_height = 24
+            row_gap = 9
+            body.append(
+                f'<rect x="{x0 - 18}" y="{y0 - 35}" width="{panel_width + 26}" height="{panel_height}" rx="6" fill="#ffffff" stroke="#d9dee7" stroke-width="1"/>'
+            )
+            body.append(chart_text(title, x0, y0 - 10, 15, weight="500"))
+            for index, row in enumerate(subset.itertuples(index=False)):
+                y = y0 + 25 + index * (row_height + row_gap)
+                row_dict = row._asdict()
+                count = int(row_dict[count_col])
+                share = float(row_dict[share_col])
+                bar_len = bar_width * count / max_count
+                body.append(chart_text(row_dict["bucket"], x0, y + 17, 12, fill="#334155"))
+                body.append(
+                    f'<rect x="{bar_x}" y="{y}" width="{bar_width}" height="{row_height}" rx="4" fill="#eef2f7"/>'
+                )
+                body.append(
+                    f'<rect x="{bar_x}" y="{y}" width="{bar_len:.1f}" height="{row_height}" rx="4" fill="{color}"/>'
+                )
+                body.append(
+                    chart_text(
+                        f"{count:,} ({share:.0%})",
+                        bar_x + bar_width + 12,
+                        y + 17,
+                        12,
+                        fill="#334155",
+                    )
+                )
+
+        distribution_panel(
+            customer_profile[customer_profile["feature"] == "repeat_status"],
+            "Customer repeat status",
+            70,
+            145,
+            505,
+            160,
+            "customers",
+            "customer_share",
+            "#2563eb",
+        )
+        distribution_panel(
+            customer_profile[customer_profile["feature"] == "total_orders"],
+            "Orders per customer",
+            665,
+            145,
+            505,
+            290,
+            "customers",
+            "customer_share",
+            "#0f766e",
+        )
+        distribution_panel(
+            purchase_behavior[purchase_behavior["feature"] == "order_value"],
+            "Order value",
+            70,
+            455,
+            505,
+            250,
+            "orders",
+            "order_share",
+            "#c2410c",
+        )
+        distribution_panel(
+            purchase_behavior[purchase_behavior["feature"] == "units_purchased"],
+            "Units per order",
+            665,
+            455,
+            505,
+            250,
+            "orders",
+            "order_share",
+            "#7c3aed",
+        )
+
+        write_svg(
+            FIGURES_DIR / "customer_purchase_overview.svg",
+            "Customer and purchase behaviour overview",
+            "Panels show repeat status, orders per customer, order value and units per order.",
             width,
             height,
             "".join(body),
@@ -1202,6 +1403,14 @@ def generate_dashboard(outputs: dict[str, pd.DataFrame], summary: dict[str, obje
         <figure><img src="../documentation/figures/product_catalog_overview.svg" alt="Product catalogue overview"></figure>
       </section>
       <section>
+        <h2>Customer and Purchase Behaviour</h2>
+        <figure><img src="../documentation/figures/customer_purchase_overview.svg" alt="Customer and purchase behaviour overview"></figure>
+      </section>
+      <section>
+        <h2>Monthly Sales Trend</h2>
+        <figure><img src="../documentation/figures/monthly_kpis.svg" alt="Monthly sales and order trend"></figure>
+      </section>
+      <section>
         <h2>Next-Quarter Baseline</h2>
         <figure><img src="../documentation/figures/product_forecast_next_quarter.svg" alt="Next-quarter product forecast"></figure>
       </section>
@@ -1259,6 +1468,7 @@ def main() -> None:
         outputs = run_sql_outputs(conn)
     outputs["monthly_forecast.csv"] = generate_monthly_forecast(outputs)
     outputs["customer_profile_summary.csv"] = generate_customer_profile_summary(outputs)
+    outputs["purchase_behavior_summary.csv"] = generate_purchase_behavior_summary(outputs)
     outputs.update(generate_product_report_outputs(outputs))
     outputs["product_next_quarter_forecast.csv"] = generate_product_quarterly_forecast(outputs)
     summary = generate_summary(outputs)
@@ -1270,6 +1480,7 @@ def main() -> None:
         print(f"- {OUTPUT_DIR / csv_name}")
     print(f"- {OUTPUT_DIR / 'monthly_forecast.csv'}")
     print(f"- {OUTPUT_DIR / 'customer_profile_summary.csv'}")
+    print(f"- {OUTPUT_DIR / 'purchase_behavior_summary.csv'}")
     for csv_name in (
         "top_products_by_quantity.csv",
         "top_products_by_revenue.csv",
@@ -1281,6 +1492,7 @@ def main() -> None:
     print(f"- {OUTPUT_DIR / 'executive_summary.md'}")
     for figure_name in (
         "product_catalog_overview.svg",
+        "customer_purchase_overview.svg",
         "top_products_by_revenue.svg",
         "top_products_by_quantity.svg",
         "slow_moving_products.svg",

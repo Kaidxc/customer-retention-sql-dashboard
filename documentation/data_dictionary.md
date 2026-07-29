@@ -15,6 +15,16 @@
 | `source_period` | Source worksheet period from the original dataset. |
 | `line_value` | Transaction-line value, calculated as `quantity * unit_price`. |
 
+## Order-level metrics
+
+| Metric | Definition |
+|---|---|
+| `order_date` | Date of a completed invoice. |
+| `product_lines` | Number of transaction lines included in an invoice. |
+| `distinct_products` | Number of distinct stock codes included in an invoice. |
+| `units_purchased` | Total units purchased in an invoice. |
+| `order_value` | Total sales value of an invoice. |
+
 ## Product-level metrics
 
 | Metric | Definition |
@@ -51,6 +61,17 @@
 | `latest_quarter_quantity` | Units sold in the latest observed quarter for the forecasted product. |
 | `latest_quarter_revenue` | Revenue in the latest observed quarter for the forecasted product. |
 | `method` | Forecasting method used for the baseline. |
+
+## Customer and purchase behaviour summaries
+
+| Metric | Definition |
+|---|---|
+| `customers` | Number of customers in a behaviour bucket. |
+| `customer_share` | Customers in a bucket divided by all known customers. |
+| `orders` | Number of orders in a purchase-behaviour bucket. |
+| `order_share` | Orders in a bucket divided by all completed orders. |
+| `feature` | Feature being summarised, such as repeat status, order value or units per order. |
+| `bucket` | Distribution bucket used in summary outputs. |
 
 ## Data quality fields
 

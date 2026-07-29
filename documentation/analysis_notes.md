@@ -8,11 +8,13 @@ The analysis date is set to one day after the latest transaction date. This give
 
 The raw dataset is an order-line table. One invoice can contain multiple rows because each row represents one product line inside the order.
 
-This project therefore uses three analytical layers:
+This project therefore uses four analytical layers:
 
 | Layer | Why it matters |
 |---|---|
 | Transaction line | Validates quantity, price and line revenue. |
+| Order | Measures order value, units purchased and basket size. |
+| Customer purchase behaviour | Summarises repeat status, orders per customer and spend distribution without creating demographic profiles. |
 | Product | Measures units sold, revenue, order count, customer reach and active months. |
 | Planning item | Classifies products as top revenue drivers, high-unit sellers, slow-moving candidates or forecast items. |
 

@@ -8,6 +8,7 @@ The SQL files define repeatable analytical logic. The build script runs these fi
 |---|---|---|
 | `00_dataset_overview.sql` | `outputs/dataset_overview.csv` | Overall rows, customers, orders, revenue and analysis date |
 | `01_customer_kpis.sql` | `outputs/customer_metrics.csv` | Customer purchase-behaviour metrics used for reach context |
+| `02_order_purchase_summary.sql` | `outputs/order_purchase_summary.csv` | Order-level purchase size and value metrics |
 | `05_monthly_kpis.sql` | `outputs/monthly_kpis.csv` | Monthly revenue, orders, customers, AOV and repeat-purchase context |
 | `06_repeat_customer_summary.sql` | `outputs/repeat_customer_summary.csv` | Repeat-customer extract demonstrating `WHERE` and `HAVING` in context |
 | `07_data_quality_checks.sql` | `outputs/data_quality_checks.csv` | Quality checks across accuracy, validity, timeliness, completeness, consistency and uniqueness |
