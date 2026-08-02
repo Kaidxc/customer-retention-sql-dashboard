@@ -12,7 +12,7 @@ The management question is:
 
 | Analyst capability | Evidence in this repository |
 |---|---|
-| Business reporting | A report that starts from management questions and ends with product actions. |
+| Business reporting | A plain-English report that starts from management questions and ends with product actions. |
 | SQL analysis | Repeatable SQL outputs for dataset overview, products, orders, customers, monthly trends, country sales and data quality. |
 | BI data modelling | A proposed star schema, KPI layer and Power BI report design in [`power_bi/`](power_bi/). |
 | Data quality assurance | Checks mapped to accuracy, validity, timeliness, completeness, consistency and uniqueness. |
@@ -213,7 +213,7 @@ This repository includes a Power BI design pack so the project can be presented 
 - [`power_bi/measures.md`](power_bi/measures.md) - KPI and DAX measure definitions.
 - [`power_bi/report_pages.md`](power_bi/report_pages.md) - page-by-page dashboard design.
 
-The HTML dashboard is available at [`dashboard/product_sales_dashboard.html`](dashboard/product_sales_dashboard.html). It is visual-first; detailed records remain in CSV outputs.
+The HTML dashboard is available at [https://kaidxc.github.io/online-retail-product-sales-analysis/dashboard/product_sales_dashboard.html](https://kaidxc.github.io/online-retail-product-sales-analysis/dashboard/product_sales_dashboard.html). It is visual-first; detailed records remain in CSV outputs.
 
 ## Data Quality and Reproducibility
 
