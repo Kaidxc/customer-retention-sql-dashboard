@@ -12,7 +12,7 @@ The management question is:
 
 | Analyst capability | Evidence in this repository |
 |---|---|
-| Business reporting | A plain-English report that starts from management questions and ends with product actions. |
+| Business reporting | A report that starts from management questions and ends with product actions. |
 | SQL analysis | Repeatable SQL outputs for dataset overview, products, orders, customers, monthly trends, country sales and data quality. |
 | BI data modelling | A proposed star schema, KPI layer and Power BI report design in [`power_bi/`](power_bi/). |
 | Data quality assurance | Checks mapped to accuracy, validity, timeliness, completeness, consistency and uniqueness. |
