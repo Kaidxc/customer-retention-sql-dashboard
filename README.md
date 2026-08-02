@@ -204,6 +204,16 @@ The business should manage products in four groups:
 3. **Review slow-moving products before discounting or delisting.** Transaction data shows lack of recent sales, but not whether the cause is stockout, discontinuation or weak demand.
 4. **Forecast stable products individually and manage low-selling items by rules.** The full catalogue is too sparse for reliable product-by-product forecasting.
 
+## Product Action Groups
+
+The interactive dashboard uses action groups to translate product metrics into management decisions. Products are grouped by revenue, sales stability, customer/order reach and recent sales activity:
+
+- **Protect**: high-revenue products with broad customer or order reach; prioritise availability and supplier review.
+- **Forecast**: stable high-revenue products with enough sales history for product-level demand forecasting.
+- **Bundle**: high-unit or basket-friendly products that can support cross-sell or promotion planning.
+- **Review**: slow-moving or inactive products that need lifecycle, seasonality or stockout checks before discounting or delisting.
+- **Monitor**: products that remain in the catalogue but do not yet require a specific protect, forecast, bundle or review action.
+
 ## Power BI Portfolio Layer
 
 This repository includes a Power BI design pack so the project can be presented as a BI analyst portfolio piece, not only a code project:
